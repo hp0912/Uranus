@@ -6,9 +6,10 @@ import { Content } from '../components/Content';
 import { UranusAvatar } from '../components/UranusAvatar';
 import { UranusMotto } from '../components/UranusMotto';
 import { GetServerSideProps } from 'next';
-import { wechatGameList } from '../utils/httpClient';
-import { Input } from 'antd';
+import { wechatGameList, wechatRedirectUrl } from '../utils/httpClient';
+import { Input, Modal } from 'antd';
 import { baseURL } from '../utils/constant';
+import { browserDetect } from '../utils';
 
 interface WechatGameList {
   version: number;
@@ -26,6 +27,9 @@ interface WechatGameList {
 }
 
 const WechatScan = (props: { gameList: WechatGameList }) => {
+  const [redirectUrl, setRedirectUrl] = useState(
+    `${baseURL}/api/wechat-scan/tencentappcente?key=$(apppy)`
+  );
   const [games, setGames] = useState(props.gameList.game);
   const [keyword, setKeyword] = useState('');
 
@@ -41,6 +45,24 @@ const WechatScan = (props: { gameList: WechatGameList }) => {
       setGames(props.gameList.game);
     }
   }, [keyword]);
+
+  useEffect(() => {
+    if (typeof window !== undefined) {
+      const browser = browserDetect(window.navigator.userAgent);
+      if (browser.os.phone && browser.browser.wechat) {
+        wechatRedirectUrl()
+          .then((resp) => {
+            setRedirectUrl(resp?.data?.data);
+          })
+          .catch(() => {
+            Modal.error({
+              title: '权限不足',
+              content: '请先登录',
+            });
+          });
+      }
+    }
+  }, []);
 
   const onSearch = useCallback((value: string) => {
     setKeyword(value);
@@ -146,7 +168,9 @@ const WechatScan = (props: { gameList: WechatGameList }) => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}
-              href={`${baseURL}/api/wechat-scan/tencentappcente?key=${game.py}`}
+              href={redirectUrl
+                .replace('$(apppy)', game.py)
+                .replace('$(appid)', game.appId)}
               target="_blank"
               rel="noopener noreferrer"
             >
