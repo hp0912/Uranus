@@ -1,11 +1,18 @@
-import { DownOutlined, LogoutOutlined, NotificationOutlined, RobotOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  DownOutlined,
+  LogoutOutlined,
+  NotificationOutlined,
+  RobotOutlined,
+  SettingOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import { Avatar, Badge, Dropdown, Menu, message, Modal, Tooltip } from 'antd';
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { SETUSER, UserContext } from '../../store/user';
 import { notificationCount, signOut } from '../../utils/httpClient';
 import { UserNotification } from './UserNotification';
-import { WriteIcon } from './WriteIcon';
+import WriteOutlined from '../../icons/WriteOutlined';
 import { AdminMenuKey } from '../Admin';
 
 // 样式
@@ -31,21 +38,27 @@ const UserAvatar: FC<IUserAvatarProps> = (props) => {
   const [notiVisible, setNotiVisible] = useState(false);
 
   useEffect(() => {
-    notificationCount().then((result) => {
-      setNotifications(result.data.data);
-    }).catch((reason) => {
-      console.error(reason);
-    });
-
-    const timer = setInterval(() => {
-      notificationCount().then((result) => {
+    notificationCount()
+      .then((result) => {
         setNotifications(result.data.data);
-      }).catch((reason) => {
+      })
+      .catch((reason) => {
         console.error(reason);
       });
+
+    const timer = setInterval(() => {
+      notificationCount()
+        .then((result) => {
+          setNotifications(result.data.data);
+        })
+        .catch((reason) => {
+          console.error(reason);
+        });
     }, 10000);
 
-    return () => { clearInterval(timer); };
+    return () => {
+      clearInterval(timer);
+    };
   }, []);
 
   const onArticleEditClick = useCallback(() => {
@@ -88,9 +101,10 @@ const UserAvatar: FC<IUserAvatarProps> = (props) => {
         userContext.userDispatch({ type: SETUSER, data: null });
       }
     } catch (ex) {
+      const reason = ex as any;
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: reason.message,
       });
       setMenuDisabled(false);
     }
@@ -99,47 +113,44 @@ const UserAvatar: FC<IUserAvatarProps> = (props) => {
   const UserMenu = (
     <Menu theme="light">
       <Menu.Item key="userSettings">
-        <span onClick={onUserSettingClick} >
+        <span onClick={onUserSettingClick}>
           <SettingOutlined /> 个人设置
         </span>
       </Menu.Item>
       <Menu.Item key="userHomePages">
-        <span onClick={onUserHomePagesClick} >
+        <span onClick={onUserHomePagesClick}>
           <UserOutlined /> 我的主页
         </span>
       </Menu.Item>
       <Menu.Item key="notification">
-        <span onClick={onNotificationClick} >
+        <span onClick={onNotificationClick}>
           <NotificationOutlined /> 系统通知
-          {
-            notifications ?
-              <> [<span style={{ color: 'red' }}>{notifications}</span>]</> :
-              null
-          }
+          {notifications ? (
+            <>
+              {' '}
+              [<span style={{ color: 'red' }}>{notifications}</span>]
+            </>
+          ) : null}
         </span>
       </Menu.Item>
-      {
-        userContext.userState && userContext.userState?.accessLevel > 5 && !props.isBackend &&
-        (
+      {userContext.userState &&
+        userContext.userState?.accessLevel > 5 &&
+        !props.isBackend && (
           <Menu.Item key="backManage">
-            <span onClick={onBackManageClick} >
+            <span onClick={onBackManageClick}>
               <RobotOutlined /> 后台管理
             </span>
           </Menu.Item>
-        )
-      }
-      {
-        props.isBackend &&
-        (
-          <Menu.Item key="goBackFrontend">
-            <span onClick={onGoBackFrontendClick} >
-              <RobotOutlined /> 返回前台
-            </span>
-          </Menu.Item>
-        )
-      }
+        )}
+      {props.isBackend && (
+        <Menu.Item key="goBackFrontend">
+          <span onClick={onGoBackFrontendClick}>
+            <RobotOutlined /> 返回前台
+          </span>
+        </Menu.Item>
+      )}
       <Menu.Item key="signOut">
-        <span onClick={onSingOutClick} >
+        <span onClick={onSingOutClick}>
           <LogoutOutlined /> 退出
         </span>
       </Menu.Item>
@@ -147,31 +158,53 @@ const UserAvatar: FC<IUserAvatarProps> = (props) => {
   );
 
   return (
-    <div className={props.isBackend ? headerStyles.user_avatar_backend : headerStyles.user_avatar_frontend}>
-      {
-        !props.isBackend &&
-        (
-          <Tooltip className={headerStyles.article_edit} title="写博客">
-            <WriteIcon onClick={onArticleEditClick} />
-          </Tooltip>
-        )
+    <div
+      className={
+        props.isBackend
+          ? headerStyles.user_avatar_backend
+          : headerStyles.user_avatar_frontend
       }
+    >
+      {!props.isBackend && (
+        <Tooltip className={headerStyles.article_edit} title="写博客">
+          <WriteOutlined
+            style={{ fontSize: 26 }}
+            onClick={onArticleEditClick}
+          />
+        </Tooltip>
+      )}
       <Dropdown
         placement="bottomRight"
         trigger={['click']}
         disabled={menuDisabled}
         overlay={UserMenu}
       >
-        <span style={{ color: props.avatarColor, cursor: 'pointer' }} onClick={e => e.preventDefault()}>
-          <Badge count={notifications ? <div className={headerStyles.badge}>{notifications}</div> : 0}>
-            <Avatar className={avatarStyles.image} size={props.avatarSize} src={userContext.userState?.avatar} />
-          </Badge>
-          <span className={headerStyles.nickname} style={{ paddingLeft: 8, paddingRight: 8 }}>
-            {
-              userContext.userState && userContext.userState.nickname.length > 11 ?
-                userContext.userState.nickname.substr(0, 8) + '...' :
-                userContext.userState?.nickname
+        <span
+          style={{ color: props.avatarColor, cursor: 'pointer' }}
+          onClick={(e) => e.preventDefault()}
+        >
+          <Badge
+            count={
+              notifications ? (
+                <div className={headerStyles.badge}>{notifications}</div>
+              ) : (
+                0
+              )
             }
+          >
+            <Avatar
+              className={avatarStyles.image}
+              size={props.avatarSize}
+              src={userContext.userState?.avatar}
+            />
+          </Badge>
+          <span
+            className={headerStyles.nickname}
+            style={{ paddingLeft: 8, paddingRight: 8 }}
+          >
+            {userContext.userState && userContext.userState.nickname.length > 11
+              ? userContext.userState.nickname.substr(0, 8) + '...'
+              : userContext.userState?.nickname}
           </span>
           <DownOutlined />
         </span>

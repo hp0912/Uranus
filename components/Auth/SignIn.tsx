@@ -1,6 +1,13 @@
 import { KeyOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Divider, Input, message, Modal, Space } from 'antd';
-import React, { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import dynamic from 'next/dynamic';
 import { SETUSER, UserContext } from '../../store/user';
 import { useSafeProps, useSetState } from '../../utils/commonHooks';
@@ -9,9 +16,9 @@ import { AuthMode } from './SignUp';
 import { browserDetect } from '../../utils';
 
 // 图标
-import { WechatOutlined } from './WechatOutlined';
-import { QQOutlined } from './QQOutlined';
-import { GithubOutlined } from './GithubOutlined';
+import WechatOutlined from '../../icons/WechatOutlined';
+import QQOutlined from '../../icons/QQOutlined';
+import GithubOutlined from '../../icons/GithubOutlined';
 
 // 样式
 import styles from './auth.module.css';
@@ -38,7 +45,10 @@ export const SignIn: FC<ISignInProps> = (props) => {
   const safeProps = useSafeProps<ISignInProps>(props);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [signInState, setSignInState] = useSetState<ISignInState>({ username: '', password: '' });
+  const [signInState, setSignInState] = useSetState<ISignInState>({
+    username: '',
+    password: '',
+  });
   const authTimer = useRef<number>();
   const dxTokenRef = useRef<string>();
   const dxInstanceRef = useRef<any>();
@@ -49,15 +59,21 @@ export const SignIn: FC<ISignInProps> = (props) => {
     };
   }, []);
 
-  const onUserNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSignInState({ username: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onUserNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSignInState({ username: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
-  const onPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSignInState({ password: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onPasswordChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSignInState({ password: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const signUp = useCallback(() => {
     safeProps.current.switchMode(AuthMode.signup);
@@ -88,7 +104,11 @@ export const SignIn: FC<ISignInProps> = (props) => {
         return;
       }
 
-      const result = await signIn({ username, password, token: dxTokenRef.current });
+      const result = await signIn({
+        username,
+        password,
+        token: dxTokenRef.current,
+      });
 
       if (userContext.userDispatch) {
         userContext.userDispatch({ type: SETUSER, data: result.data.data });
@@ -99,10 +119,11 @@ export const SignIn: FC<ISignInProps> = (props) => {
 
       safeProps.current.onCancel();
     } catch (ex) {
+      const reason = ex as any;
       dxInstanceRef.current?.reload();
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: reason.message,
       });
       setLoading(false);
     }
@@ -116,7 +137,11 @@ export const SignIn: FC<ISignInProps> = (props) => {
     const state = Math.ceil(Math.random() * 1000000);
     const { os } = browserDetect(window.navigator.userAgent);
     const display = os.phone ? 'mobile' : '';
-    const newWin = window.open(`https://graph.qq.com/oauth2.0/authorize?client_id=101953410&redirect_uri=https%3A%2F%2Fhouhoukang.com%2Fqq%2Foauth%2Fauthorize&response_type=code&state=${state}&scope=get_user_info${display ? `&display=${display}` : ''}`);
+    const newWin = window.open(
+      `https://graph.qq.com/oauth2.0/authorize?client_id=101953410&redirect_uri=https%3A%2F%2Fhouhoukang.com%2Fqq%2Foauth%2Fauthorize&response_type=code&state=${state}&scope=get_user_info${
+        display ? `&display=${display}` : ''
+      }`
+    );
 
     authTimer.current = window.setInterval(() => {
       if (newWin && newWin.closed) {
@@ -137,7 +162,9 @@ export const SignIn: FC<ISignInProps> = (props) => {
     window.clearInterval(authTimer.current);
     window.localStorage.setItem('OAUTH_LOGIN_URL', window.location.href);
 
-    const newWin = window.open('https://github.com/login/oauth/authorize?client_id=b0263da0ed583f782b96&redirect_uri=https://houhoukang.com/github/oauth/authorize');
+    const newWin = window.open(
+      'https://github.com/login/oauth/authorize?client_id=b0263da0ed583f782b96&redirect_uri=https://houhoukang.com/github/oauth/authorize'
+    );
 
     authTimer.current = window.setInterval(() => {
       if (newWin && newWin.closed) {
@@ -172,23 +199,23 @@ export const SignIn: FC<ISignInProps> = (props) => {
         onChange={onPasswordChange}
       />
       <DXCaptcha callback={dxCallback} getDXRef={getDXRef} />
-      <Button type="primary" size="large" loading={loading} block onClick={onSignInClick}>
+      <Button
+        type="primary"
+        size="large"
+        loading={loading}
+        block
+        onClick={onSignInClick}
+      >
         登录
       </Button>
       <div className={styles.prompt_box}>
         <span>
           没有账号?
-          <Button
-            type="link"
-            onClick={signUp}
-          >
+          <Button type="link" onClick={signUp}>
             注册
           </Button>
         </span>
-        <Button
-          type="link"
-          onClick={resetPassword}
-        >
+        <Button type="link" onClick={resetPassword}>
           忘记密码
         </Button>
       </div>
@@ -197,9 +224,25 @@ export const SignIn: FC<ISignInProps> = (props) => {
       </p>
       <Divider style={dividerStyle}>第三方登录</Divider>
       <div className={styles.third}>
-        <Avatar className={styles.third_item} size={38} icon={<QQOutlined onClick={onQQOAuth} />} />
-        <Avatar className={styles.third_item} size={38} icon={<WechatOutlined onClick={onWechatOAuth} />} />
-        <Avatar className={styles.third_item} size={38} icon={<GithubOutlined onClick={onGitHubOAuth} />} />
+        <Avatar
+          className={styles.third_item}
+          size={38}
+          icon={<QQOutlined onClick={onQQOAuth} style={{ fontSize: 38 }} />}
+        />
+        <Avatar
+          className={styles.third_item}
+          size={38}
+          icon={
+            <WechatOutlined onClick={onWechatOAuth} style={{ fontSize: 38 }} />
+          }
+        />
+        <Avatar
+          className={styles.third_item}
+          size={38}
+          icon={
+            <GithubOutlined onClick={onGitHubOAuth} style={{ fontSize: 38 }} />
+          }
+        />
       </div>
     </Space>
   );

@@ -1,7 +1,7 @@
 import { Button, Col, Input, Modal, Row, Tooltip } from 'antd';
 import QRCode from 'qrcode.react';
 import React, { FC, useCallback, useState } from 'react';
-import { QRCodeIcon } from './QRCodeIcon';
+import QRCodeOutlined from '../../icons/QRCodeOutlined';
 
 export const QRCodeGen: FC = () => {
   const [visible, setVisible] = useState(false);
@@ -21,9 +21,12 @@ export const QRCodeGen: FC = () => {
     setQRCodeText('');
   }, []);
 
-  const onQRCodeTextChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setQRCodeText(event.target.value);
-  }, []);
+  const onQRCodeTextChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setQRCodeText(event.target.value);
+    },
+    []
+  );
 
   const onGenClick = useCallback(() => {
     setLoading(true);
@@ -36,7 +39,7 @@ export const QRCodeGen: FC = () => {
   return (
     <>
       <Tooltip title="文字转二维码">
-        <QRCodeIcon onClick={onShow} />
+        <QRCodeOutlined style={{ fontSize: 36 }} onClick={onShow} />
       </Tooltip>
       <Modal
         visible={visible}
@@ -54,25 +57,27 @@ export const QRCodeGen: FC = () => {
             />
           </Col>
           <Col span={5}>
-            <Button type="primary" onClick={onGenClick} loading={loading}>开始生成</Button>
+            <Button type="primary" onClick={onGenClick} loading={loading}>
+              开始生成
+            </Button>
           </Col>
         </Row>
-        {
-          Imgvisible &&
-          (
-            <Row style={{ rowGap: 0 }}>
-              <Col span={24}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 25 }}>
-                  <QRCode
-                    value={QRCodeURL}
-                    size={250}
-                    fgColor="#000000"
-                  />
-                </div>
-              </Col>
-            </Row>
-          )
-        }
+        {Imgvisible && (
+          <Row style={{ rowGap: 0 }}>
+            <Col span={24}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 25,
+                }}
+              >
+                <QRCode value={QRCodeURL} size={250} fgColor="#000000" />
+              </div>
+            </Col>
+          </Row>
+        )}
       </Modal>
     </>
   );
