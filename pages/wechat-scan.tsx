@@ -10,6 +10,7 @@ import { wechatGameList, wechatRedirectUrl } from '../utils/httpClient';
 import { Input, Modal } from 'antd';
 import { baseURL } from '../utils/constant';
 import { browserDetect } from '../utils';
+import SafariOutlined from '../icons/SafariOutlined';
 
 interface WechatGameList {
   version: number;
@@ -123,36 +124,26 @@ const WechatScan = (props: { gameList: WechatGameList }) => {
             扫码登录游戏，完美的解决了不上微信也能登录游戏。本站无任何广告，支持苹果、安卓系统，纯净无毒，永久免费，请广大玩家们放心使用。
           </p>
           <br />
-          <h4>IOS登录教程</h4>
-          <p style={{ marginBottom: 0, fontSize: 13, color: '#444242' }}>
-            打开要登录的应用，注销当前登录。
-            <br />
-            登录页如有用户协议等，需要先勾选协议。
-            <br />
-            <br />
-            上号者：请使用苹果自带的
-            <span style={{ color: 'red' }}> Safari </span>
-            浏览器或者火狐浏览器打开对应的游戏链接(比如
-            <a href={`${baseURL}/api/wechat-scan/tencentappcente?key=wzry`}>
-              王者荣耀
-            </a>
-            )获取二维码，截图给号主，其它浏览器可能会出现无法跳转的情况；
-            <br />
-            扫码者：必须使用微信“扫一扫”后置摄像头扫描，授权成功后上号者将自动跳转游戏；不可以长按识别哦！
-          </p>
-          <br />
-          <h4>安卓登录教程</h4>
+          <h4>登录教程</h4>
           <p style={{ marginBottom: 3, fontSize: 13, color: '#444242' }}>
             打开要登录的应用，注销当前登录。
             <br />
             登录页如有用户协议等，需要先勾选协议。
             <br />
             <br />
-            上号者：使用任意浏览器打开对应的游戏链接，截图二维码，发给号主，然后
+            上号者：使用任意浏览器(苹果设备只能使用自带的
+            <span style={{ color: 'red' }}>Safari</span>
+            <SafariOutlined style={{ fontSize: 13 }} />
+            浏览器)打开对应的游戏链接(比如
+            <a href={redirectUrl}>王者荣耀</a>)，截图二维码，发给号主，然后
             <span style={{ color: 'red' }}> 立即回到浏览器二维码界面 </span>
             等待对方扫码，否则将无法正常跳转游戏！
             <br />
             扫码者：必须使用微信“扫一扫”后置摄像头扫描，授权成功后上号者将自动跳转游戏；不可以长按识别哦！
+            <br />
+            <span style={{ color: '#ff8f00' }}>
+              温馨提示：为了方便有多个手机的玩家在各个设备之间切换账号，本链接在微信可以直接打开，但是要注册本网站账号。
+            </span>
           </p>
         </div>
         {games.map((game, index) => {
