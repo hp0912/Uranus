@@ -1,4 +1,9 @@
-import { HomeOutlined, IdcardOutlined, InstagramOutlined, MessageOutlined } from '@ant-design/icons';
+import {
+  HomeOutlined,
+  IdcardOutlined,
+  InstagramOutlined,
+  MessageOutlined,
+} from '@ant-design/icons';
 import { Col, Input, Menu, Row } from 'antd';
 import React, { FC, useCallback, useContext, useState } from 'react';
 import { useRouter } from 'next/router';
@@ -11,11 +16,15 @@ import UserAvatar from './UserAvatar';
 // 样式
 import styles from './header.module.css';
 
+// 图标
+import AppOutlined from '../../icons/AppOutlined';
+
 const { Search } = Input;
 
 export enum MenuKey {
   frontend = 'frontend',
   gossip = 'gossip',
+  tencentappcente = 'tencentappcente',
   messageboard = 'messageboard',
   aboutus = 'aboutus',
 }
@@ -27,13 +36,16 @@ const Header: FC = () => {
   const [authVisible, setAuthVisible] = useState<boolean>(false);
   const [authState, setAuthState] = useState<AuthMode>(AuthMode.none);
 
-  const onSearch = useCallback((value: string) => {
-    if (value) {
-      router.push(`/${MenuKey.frontend}?keyword=${value}`);
-    } else {
-      router.push(`/${MenuKey.frontend}`);
-    }
-  }, [router]);
+  const onSearch = useCallback(
+    (value: string) => {
+      if (value) {
+        router.push(`/${MenuKey.frontend}?keyword=${value}`);
+      } else {
+        router.push(`/${MenuKey.frontend}`);
+      }
+    },
+    [router]
+  );
 
   const onSignInClick = useCallback(() => {
     setAuthState(AuthMode.signin);
@@ -51,7 +63,8 @@ const Header: FC = () => {
   }, []);
 
   const selectedKeysMatch = router.pathname.match(/^\/([^/]+?)(?:\/|\?|$)/);
-  const selectedKeys = selectedKeysMatch && selectedKeysMatch[1] ? [selectedKeysMatch[1]] : [];
+  const selectedKeys =
+    selectedKeysMatch && selectedKeysMatch[1] ? [selectedKeysMatch[1]] : [];
 
   return (
     <div className={styles.header}>
@@ -69,37 +82,38 @@ const Header: FC = () => {
               </div>
             </div>
             <div className={styles.menu_container_right}>
-              <Menu
-                theme="light"
-                mode="horizontal"
-                selectedKeys={selectedKeys}
-              >
+              <Menu theme="light" mode="horizontal" selectedKeys={selectedKeys}>
                 <Menu.Item key={MenuKey.frontend} icon={<HomeOutlined />}>
                   <Link href="/frontend">
-                    <a>
-                      前端优选
-                    </a>
+                    <a>前端优选</a>
                   </Link>
                 </Menu.Item>
                 <Menu.Item key={MenuKey.gossip} icon={<InstagramOutlined />}>
                   <Link href="/gossip">
-                    <a>
-                      神秘空间
-                    </a>
+                    <a>神秘空间</a>
                   </Link>
                 </Menu.Item>
-                <Menu.Item className={styles.menu_item_hide} key={MenuKey.messageboard} icon={<MessageOutlined />}>
+                <Menu.Item key={MenuKey.tencentappcente} icon={<AppOutlined />}>
+                  <Link href="/wechat-scan">
+                    <a>腾讯应用中心</a>
+                  </Link>
+                </Menu.Item>
+                <Menu.Item
+                  className={styles.menu_item_hide}
+                  key={MenuKey.messageboard}
+                  icon={<MessageOutlined />}
+                >
                   <Link href="/messageboard">
-                    <a>
-                      留言板
-                    </a>
+                    <a>留言板</a>
                   </Link>
                 </Menu.Item>
-                <Menu.Item className={styles.menu_item_hide} key={MenuKey.aboutus} icon={<IdcardOutlined />}>
+                <Menu.Item
+                  className={styles.menu_item_hide}
+                  key={MenuKey.aboutus}
+                  icon={<IdcardOutlined />}
+                >
                   <Link href="/aboutus">
-                    <a>
-                      关于我
-                    </a>
+                    <a>关于我</a>
                   </Link>
                 </Menu.Item>
               </Menu>
@@ -117,16 +131,22 @@ const Header: FC = () => {
         </Col>
         <Col xs={6} sm={6} md={6} lg={5} xl={4} xxl={4}>
           <div className={styles.login_container}>
-            {
-              userContext.userState ?
-                <UserAvatar isBackend={false} avatarColor="#fff" avatarSize={30} /> :
-                (
-                  <>
-                    <span className={styles.login} onClick={onSignInClick}>登录·</span>
-                    <span className={styles.register} onClick={onSignUpClick}>注册</span>
-                  </>
-                )
-            }
+            {userContext.userState ? (
+              <UserAvatar
+                isBackend={false}
+                avatarColor="#fff"
+                avatarSize={30}
+              />
+            ) : (
+              <>
+                <span className={styles.login} onClick={onSignInClick}>
+                  登录·
+                </span>
+                <span className={styles.register} onClick={onSignUpClick}>
+                  注册
+                </span>
+              </>
+            )}
           </div>
         </Col>
         <Col xs={0} sm={0} md={0} lg={0} xl={2} xxl={2} />

@@ -22,10 +22,10 @@ const httpClient = axios.create({
   baseURL,
   timeout: 5000,
   withCredentials: process.env.NODE_ENV === 'development' ? true : false, // 允许跨域 cookie
-  headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  headers: { 'X-Requested-With': 'XMLHttpRequest' },
 });
 
-httpClient.interceptors.response.use(result => {
+httpClient.interceptors.response.use((result) => {
   if (result.data.code !== 200) {
     throw new Error(result.data.message);
   } else {
@@ -33,9 +33,15 @@ httpClient.interceptors.response.use(result => {
   }
 });
 
-const parseQueryString = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }): string => {
+const parseQueryString = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}): string => {
   const query: string[] = [];
-  const { pagination: { current, pageSize }, searchValue } = params;
+  const {
+    pagination: { current, pageSize },
+    searchValue,
+  } = params;
 
   if (current) {
     query.push(`current=${current}`);
@@ -52,7 +58,10 @@ const parseQueryString = (params: { pagination: { current?: number, pageSize?: n
 };
 
 // user
-export const userStatus = (SSRBaseURL: string | null, headers?: IncomingHttpHeaders) => {
+export const userStatus = (
+  SSRBaseURL: string | null,
+  headers?: IncomingHttpHeaders
+) => {
   return httpClient({
     method: 'GET',
     url: `${SSRBaseURL ? SSRBaseURL : ''}/api/user/status`,
@@ -60,14 +69,20 @@ export const userStatus = (SSRBaseURL: string | null, headers?: IncomingHttpHead
   });
 };
 
-export const userSearch = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const userSearch = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/user/search' + parseQueryString(params),
   });
 };
 
-export const userList = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const userList = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/user/admin/userList' + parseQueryString(params),
@@ -90,7 +105,7 @@ export const updateUserForAdmin = (data: Partial<IUserEntity>) => {
   });
 };
 
-export const sendSms = (data: { phoneNumber: string, token: string }) => {
+export const sendSms = (data: { phoneNumber: string; token: string }) => {
   return httpClient({
     method: 'POST',
     url: '/api/user/getSmsCode',
@@ -99,9 +114,9 @@ export const sendSms = (data: { phoneNumber: string, token: string }) => {
 };
 
 export const signUp = (data: {
-  username: string,
-  password: string,
-  smsCode: string,
+  username: string;
+  password: string;
+  smsCode: string;
 }) => {
   return httpClient({
     method: 'POST',
@@ -111,9 +126,9 @@ export const signUp = (data: {
 };
 
 export const signIn = (data: {
-  username: string,
-  password: string,
-  token: string,
+  username: string;
+  password: string;
+  token: string;
 }) => {
   return httpClient({
     method: 'POST',
@@ -130,9 +145,9 @@ export const signOut = () => {
 };
 
 export const resetPassword = (data: {
-  username: string,
-  password: string,
-  smsCode: string,
+  username: string;
+  password: string;
+  smsCode: string;
 }) => {
   return httpClient({
     method: 'POST',
@@ -220,14 +235,18 @@ export const notificationCount = () => {
 export const notificationList = (lastNotiId?: string) => {
   return httpClient({
     method: 'GET',
-    url: `/api/notification/notificationList${lastNotiId ? '?lastNotiId=' + lastNotiId : ''}`,
+    url: `/api/notification/notificationList${
+      lastNotiId ? '?lastNotiId=' + lastNotiId : ''
+    }`,
   });
 };
 
 export const notificationAll = (lastNotiId?: string) => {
   return httpClient({
     method: 'GET',
-    url: `/api/notification/notificationAll${lastNotiId ? '?lastNotiId=' + lastNotiId : ''}`,
+    url: `/api/notification/notificationAll${
+      lastNotiId ? '?lastNotiId=' + lastNotiId : ''
+    }`,
   });
 };
 
@@ -246,7 +265,10 @@ export const markAsReadForAll = () => {
   });
 };
 
-export const sendNotification = (data: { notification: INotificationEntity, broadcast: boolean }) => {
+export const sendNotification = (data: {
+  notification: INotificationEntity;
+  broadcast: boolean;
+}) => {
   return httpClient({
     method: 'POST',
     url: '/api/notification/sendNotification',
@@ -259,11 +281,13 @@ export const articleGet = (
   SSRBaseURL: string | null,
   articleId: string,
   token?: string,
-  headers?: IncomingHttpHeaders,
+  headers?: IncomingHttpHeaders
 ) => {
   return httpClient({
     method: 'GET',
-    url: `${SSRBaseURL ? SSRBaseURL : ''}/api/article/get?articleId=${articleId}${token ? '&token=' + token : ''}`,
+    url: `${
+      SSRBaseURL ? SSRBaseURL : ''
+    }/api/article/get?articleId=${articleId}${token ? '&token=' + token : ''}`,
     headers,
   });
 };
@@ -277,34 +301,51 @@ export const articleActionDataGet = (articleId: string) => {
 
 export const articleList = (
   SSRBaseURL: string | null,
-  params: { category: ArticleCategory, pagination: { current?: number, pageSize?: number }, searchValue?: string },
-  headers?: IncomingHttpHeaders,
+  params: {
+    category: ArticleCategory;
+    pagination: { current?: number; pageSize?: number };
+    searchValue?: string;
+  },
+  headers?: IncomingHttpHeaders
 ) => {
   const { category } = params;
   const queryString = parseQueryString(params);
 
   return httpClient({
     method: 'GET',
-    url: `${SSRBaseURL ? SSRBaseURL : ''}/api/article/list${queryString ? `${queryString}&category=${category}` : `?category=${category}`}`,
+    url: `${SSRBaseURL ? SSRBaseURL : ''}/api/article/list${
+      queryString
+        ? `${queryString}&category=${category}`
+        : `?category=${category}`
+    }`,
     headers,
   });
 };
 
-export const myArticles = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const myArticles = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/article/myArticles' + parseQueryString(params),
   });
 };
 
-export const articleListForAdmin = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const articleListForAdmin = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/article/admin/list' + parseQueryString(params),
   });
 };
 
-export const articleAudit = (data: { articleId: string, auditStatus: AuditStatus }) => {
+export const articleAudit = (data: {
+  articleId: string;
+  auditStatus: AuditStatus;
+}) => {
   return httpClient({
     method: 'POST',
     url: '/api/article/admin/audit',
@@ -372,14 +413,17 @@ export const commentList = (params: ICommentListParams) => {
   });
 };
 
-export const commentListForAdmin = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const commentListForAdmin = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/comment/admin/list' + parseQueryString(params),
   });
 };
 
-export const commentAudit = (data: { commentId: string, passed: boolean }) => {
+export const commentAudit = (data: { commentId: string; passed: boolean }) => {
   return httpClient({
     method: 'POST',
     url: '/api/comment/admin/audit',
@@ -395,7 +439,10 @@ export const commentDeleteForAdmin = (data: { commentId: string }) => {
   });
 };
 
-export const likesSubmit = (data: { likesType: LikesType, targetId: string }) => {
+export const likesSubmit = (data: {
+  likesType: LikesType;
+  targetId: string;
+}) => {
   return httpClient({
     method: 'POST',
     url: '/api/likes/like',
@@ -403,7 +450,10 @@ export const likesSubmit = (data: { likesType: LikesType, targetId: string }) =>
   });
 };
 
-export const likesCancel = (data: { likesType: LikesType, targetId: string }) => {
+export const likesCancel = (data: {
+  likesType: LikesType;
+  targetId: string;
+}) => {
   return httpClient({
     method: 'DELETE',
     url: '/api/likes/cancel',
@@ -421,7 +471,9 @@ export const messageCount = () => {
 export const messageList = (params: { lastMessageId?: string }) => {
   return httpClient({
     method: 'GET',
-    url: '/api/message/list' + (params.lastMessageId ? `?lastMessageId=${params.lastMessageId}` : ''),
+    url:
+      '/api/message/list' +
+      (params.lastMessageId ? `?lastMessageId=${params.lastMessageId}` : ''),
   });
 };
 
@@ -433,7 +485,10 @@ export const messageSubmit = (data: { message: string }) => {
   });
 };
 
-export const messageListForAdmin = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const messageListForAdmin = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/message/admin/list' + parseQueryString(params),
@@ -448,7 +503,10 @@ export const messageDeleteForAdmin = (data: { messageId: string }) => {
   });
 };
 
-export const generateOrder = (data: { goodsType: GoodsType, goodsId: string }) => {
+export const generateOrder = (data: {
+  goodsType: GoodsType;
+  goodsId: string;
+}) => {
   return httpClient({
     method: 'POST',
     url: '/api/order/generateOrder',
@@ -456,21 +514,30 @@ export const generateOrder = (data: { goodsType: GoodsType, goodsId: string }) =
   });
 };
 
-export const orderReceivables = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const orderReceivables = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/order/receivables' + parseQueryString(params),
   });
 };
 
-export const myOrders = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const myOrders = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/order/mine' + parseQueryString(params),
   });
 };
 
-export const getOrdersForAdmin = (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => {
+export const getOrdersForAdmin = (params: {
+  pagination: { current?: number; pageSize?: number };
+  searchValue?: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: '/api/order/admin/get' + parseQueryString(params),
@@ -485,7 +552,12 @@ export const orderRefundForAdmin = (data: { orderId: string }) => {
   });
 };
 
-export const initPay = (data: { orderId: string, payType: PayType, payMethod: PayMethod, token?: string }) => {
+export const initPay = (data: {
+  orderId: string;
+  payType: PayType;
+  payMethod: PayMethod;
+  token?: string;
+}) => {
   return httpClient({
     method: 'POST',
     url: '/api/pay/initPay',
@@ -516,14 +588,20 @@ export const qqOAuth = (code: string) => {
   });
 };
 
-export const getToken = (params: { tokenType: TokenType, targetId: string }) => {
+export const getToken = (params: {
+  tokenType: TokenType;
+  targetId: string;
+}) => {
   return httpClient({
     method: 'GET',
     url: `/api/token/get?tokenType=${params.tokenType}&targetId=${params.targetId}`,
   });
 };
 
-export const updateToken = (data: { tokenType: TokenType, targetId: string }) => {
+export const updateToken = (data: {
+  tokenType: TokenType;
+  targetId: string;
+}) => {
   return httpClient({
     method: 'POST',
     url: '/api/token/update',
@@ -551,5 +629,12 @@ export const watermelonUploadTokenGet = (data: { path: string }) => {
   return httpClient({
     method: 'GET',
     url: `/api/watermelon/upload-token/get?path=${data.path}`,
+  });
+};
+
+export const wechatGameList = () => {
+  return httpClient({
+    method: 'GET',
+    url: '/api/wechat/game-list',
   });
 };
