@@ -37,4 +37,4 @@ jobs:
         with:
           config: ${{ secrets.KUBE_CONFIG }}
           version: v1.21.0
-          command: '"rollout status deployment/uranus-frontend"'
+          command: rollout status deployment/uranus-frontend
