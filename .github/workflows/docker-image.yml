@@ -24,17 +24,17 @@ jobs:
         uses: steebchen/kubectl@v2.0.0
         with:
           config: ${{ secrets.KUBE_CONFIG }}
-          version: v1.14.1
+          version: v1.21.0
           command: apply -f .deploy/deployment.yml
       - name: k8s service
         uses: steebchen/kubectl@v2.0.0
         with:
           config: ${{ secrets.KUBE_CONFIG }}
-          version: v1.14.1
+          version: v1.21.0
           command: apply -f .deploy/service.yml
       - name: deployment status
         uses: steebchen/kubectl@v2.0.0
         with:
           config: ${{ secrets.KUBE_CONFIG }}
-          version: v1.14.1
+          version: v1.21.0
           command: '"rollout status deployment/uranus-frontend"'
