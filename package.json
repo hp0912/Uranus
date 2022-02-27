@@ -14,7 +14,7 @@
     "antd": "^4.12.3",
     "antd-img-crop": "^3.14.1",
     "aplayer": "^1.10.1",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "barrage-ui": "^1.4.1",
     "codemirror": "^5.60.0",
     "gif.js": "^0.2.0",
