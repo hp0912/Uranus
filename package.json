@@ -17,6 +17,7 @@
     "axios": "^0.21.2",
     "barrage-ui": "^1.4.1",
     "codemirror": "^5.60.0",
+    "ghooks": "^2.0.4",
     "gif.js": "^0.2.0",
     "highlight.js": "^10.6.0",
     "markdown-it": "^12.3.2",
