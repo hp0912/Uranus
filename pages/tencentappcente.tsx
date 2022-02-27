@@ -6,10 +6,9 @@ import { Content } from '../components/Content';
 import { UranusAvatar } from '../components/UranusAvatar';
 import { UranusMotto } from '../components/UranusMotto';
 import { GetServerSideProps } from 'next';
-import { wechatGameList, wechatRedirectUrl } from '../utils/httpClient';
-import { Input, Modal } from 'antd';
+import { wechatGameList } from '../utils/httpClient';
+import { Input } from 'antd';
 import { baseURL } from '../utils/constant';
-import { browserDetect } from '../utils';
 import SafariOutlined from '../icons/SafariOutlined';
 
 interface WechatGameList {
@@ -28,9 +27,6 @@ interface WechatGameList {
 }
 
 const WechatScan = (props: { gameList: WechatGameList }) => {
-  const [redirectUrl, setRedirectUrl] = useState(
-    `${baseURL}/api/wechat-scan/tencentappcente?key=$(apppy)`
-  );
   const [games, setGames] = useState(props.gameList.game);
   const [keyword, setKeyword] = useState('');
 
@@ -46,24 +42,6 @@ const WechatScan = (props: { gameList: WechatGameList }) => {
       setGames(props.gameList.game);
     }
   }, [keyword]);
-
-  useEffect(() => {
-    if (typeof window !== undefined) {
-      const browser = browserDetect(window.navigator.userAgent);
-      if (browser.os.phone && browser.browser.wechat) {
-        wechatRedirectUrl()
-          .then((resp) => {
-            setRedirectUrl(resp?.data?.data);
-          })
-          .catch(() => {
-            Modal.error({
-              title: '权限不足',
-              content: '请先登录',
-            });
-          });
-      }
-    }
-  }, []);
 
   const onSearch = useCallback((value: string) => {
     setKeyword(value);
@@ -133,16 +111,19 @@ const WechatScan = (props: { gameList: WechatGameList }) => {
             <br />
             上号者：使用任意浏览器(苹果设备只能使用自带的
             <span style={{ color: 'red' }}>Safari</span>
-            <SafariOutlined style={{ fontSize: 13 }} />
+            <SafariOutlined style={{ fontSize: 14 }} />
             浏览器)打开对应的游戏链接(比如
-            <a href={redirectUrl}>王者荣耀</a>)，截图二维码，发给号主，然后
+            <a href={`${baseURL}/api/wechat-scan/tencentappcente?key=wzry`}>
+              王者荣耀
+            </a>
+            )，截图二维码，发给号主，然后
             <span style={{ color: 'red' }}> 立即回到浏览器二维码界面 </span>
             等待对方扫码，否则将无法正常跳转游戏！
             <br />
             扫码者：必须使用微信“扫一扫”后置摄像头扫描，授权成功后上号者将自动跳转游戏；不可以长按识别哦！
             <br />
             <span style={{ color: '#ff8f00' }}>
-              温馨提示：为了方便有多个手机的玩家在各个设备之间切换账号，本链接在微信可以直接打开，但是要注册本网站账号。
+              温馨提示：链接可以直接在微信内打开。
             </span>
           </p>
         </div>
@@ -159,9 +140,7 @@ const WechatScan = (props: { gameList: WechatGameList }) => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}
-              href={redirectUrl
-                .replace('$(apppy)', game.py)
-                .replace('$(appid)', game.appId)}
+              href={`${baseURL}/api/wechat-scan/tencentappcente?key=${game.py}`}
               target="_blank"
               rel="noopener noreferrer"
             >

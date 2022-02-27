@@ -37,7 +37,7 @@ export const MagicBox: FC = () => {
             </Link>
           </span>
           <span>
-            <Link href="/wechat-scan">
+            <Link href="/tencentappcente">
               <Tooltip title="微信扫码登录">
                 <WechatScanOutlined style={{ fontSize: 36 }} />
               </Tooltip>

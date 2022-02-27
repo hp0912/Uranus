@@ -638,10 +638,3 @@ export const wechatGameList = () => {
     url: '/api/wechat/game-list',
   });
 };
-
-export const wechatRedirectUrl = () => {
-  return httpClient({
-    method: 'GET',
-    url: '/api/wechat/redirect-url',
-  });
-};

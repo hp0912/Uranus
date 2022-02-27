@@ -94,7 +94,7 @@ const Header: FC = () => {
                   </Link>
                 </Menu.Item>
                 <Menu.Item key={MenuKey.tencentappcente} icon={<AppOutlined />}>
-                  <Link href="/wechat-scan">
+                  <Link href="/tencentappcente">
                     <a>腾讯应用中心</a>
                   </Link>
                 </Menu.Item>
