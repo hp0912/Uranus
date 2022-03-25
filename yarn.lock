@@ -79,6 +79,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@^7.6.2":
+  version "7.17.8"
+  resolved "https://registry-npm.myscrm.cn/repository/pkg/@babel/runtime/-/runtime-7.17.8.tgz#3e56e4aff81befa55ac3ac6a0967349fd1c5bca2"
+  integrity sha512-dQpEpK0O9o6lj6oPu0gRDbbnk+4LeHlNcBpspf6Olzt3GIX4P1lWF1gS+pHLDFlaJvbR6q7jCfQ08zA4QJBnmA==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/types@^7.12.13":
   version "7.13.0"
   resolved "https://registry.npm.taobao.org/@babel/types/download/@babel/types-7.13.0.tgz?cache=0&sync_timestamp=1614034208093&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40babel%2Ftypes%2Fdownload%2F%40babel%2Ftypes-7.13.0.tgz#74424d2816f0171b4100f0ab34e9a374efdf7f80"
@@ -1343,6 +1350,11 @@ esutils@^2.0.2:
   resolved "https://registry.npm.taobao.org/esutils/download/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha1-dNLrTeC42hKTcRkQ1Qd1ubcQ72Q=
 
+eventemitter3@^4.0.0:
+  version "4.0.7"
+  resolved "https://registry-npm.myscrm.cn/repository/pkg/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
+  integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
+
 extend-shallow@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npm.taobao.org/extend-shallow/download/extend-shallow-2.0.1.tgz#51af7d614ad9a9f610ea1bafbb989d6b1c56890f"
@@ -1630,10 +1642,10 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-highlight.js@^10.6.0:
-  version "10.6.0"
-  resolved "https://registry.npm.taobao.org/highlight.js/download/highlight.js-10.6.0.tgz#0073aa71d566906965ba6e1b7be7b2682f5e18b6"
-  integrity sha1-AHOqcdVmkGllum4be+eyaC9eGLY=
+highlight.js@^11.5.0:
+  version "11.5.0"
+  resolved "https://registry-npm.myscrm.cn/repository/pkg/highlight.js/-/highlight.js-11.5.0.tgz#00abb7ed926491adbdabc93a4f3fd2b88b451b4a"
+  integrity sha512-SM6WDj5/C+VfIY8pZ6yW6Xa0Fm1tniYVYWYW1Q/DcMnISZFrC3aQAZZZFAAZtybKNrGId3p/DNbFTtcTXXgYBw==
 
 hoist-non-react-statics@^3.3.2:
   version "3.3.2"
@@ -2072,10 +2084,10 @@ markdown-it-emoji@^2.0.0:
   resolved "https://registry.npm.taobao.org/markdown-it-emoji/download/markdown-it-emoji-2.0.0.tgz#3164ad4c009efd946e98274f7562ad611089a231"
   integrity sha1-MWStTACe/ZRumCdPdWKtYRCJojE=
 
-markdown-it-footnote@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.npm.taobao.org/markdown-it-footnote/download/markdown-it-footnote-3.0.2.tgz#1575ee7a093648d4e096aa33386b058d92ac8bc1"
-  integrity sha1-FXXuegk2SNTglqozOGsFjZKsi8E=
+markdown-it-footnote@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry-npm.myscrm.cn/repository/pkg/markdown-it-footnote/-/markdown-it-footnote-3.0.3.tgz#e0e4c0d67390a4c5f0c75f73be605c7c190ca4d8"
+  integrity sha512-YZMSuCGVZAjzKMn+xqIco9d1cLGxbELHZ9do/TSYVzraooV8ypsppKNmUJ0fVH5ljkCInQAtFpm8Rb3eXSrt5w==
 
 markdown-it-ins@^3.0.1:
   version "3.0.1"
@@ -3100,12 +3112,15 @@ react-lazyload@^3.2.0:
   resolved "https://registry.npm.taobao.org/react-lazyload/download/react-lazyload-3.2.0.tgz#497bd06a6dbd7015e3376e1137a67dc47d2dd021"
   integrity sha1-SXvQam29cBXjN24RN6Z9xH0t0CE=
 
-react-markdown-editor-lite@^1.2.4:
-  version "1.2.4"
-  resolved "https://registry.npm.taobao.org/react-markdown-editor-lite/download/react-markdown-editor-lite-1.2.4.tgz#d47ea00f62e7c82ae8803a990d011d4f44015c20"
-  integrity sha1-1H6gD2LnyCrogDqZDQEdT0QBXCA=
+react-markdown-editor-lite@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry-npm.myscrm.cn/repository/pkg/react-markdown-editor-lite/-/react-markdown-editor-lite-1.3.2.tgz#734646ab619ac707fe9c366153cc0d323a376f59"
+  integrity sha512-pjtu+tpTjc2u4hauFozzbX7EQEnKCCfDCEAY4vnc0AXCPqdFwaoe7A/Fb3J8qwUIS1Ox5XVjeRWKt11FgrMdZA==
   dependencies:
+    "@babel/runtime" "^7.6.2"
     classnames "^2.2.6"
+    eventemitter3 "^4.0.0"
+    uuid "^8.3.2"
 
 react@17.0.1:
   version "17.0.1"
@@ -3831,6 +3846,11 @@ utility@^1.16.1, utility@^1.8.0:
     mkdirp "^0.5.1"
     mz "^2.7.0"
     unescape "^1.0.1"
+
+uuid@^8.3.2:
+  version "8.3.2"
+  resolved "https://registry-npm.myscrm.cn/repository/pkg/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 v8-compile-cache@^2.0.3:
   version "2.2.0"
