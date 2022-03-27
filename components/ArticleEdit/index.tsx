@@ -62,7 +62,7 @@ import sup from 'markdown-it-sup';
 import twemoji from 'twemoji';
 
 // css
-import 'highlight.js/styles/an-old-hope.css';
+import 'highlight.js/styles/base16/darcula.css';
 import 'react-markdown-editor-lite/lib/index.css';
 import styles from '../components.module.css';
 

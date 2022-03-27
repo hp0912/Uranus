@@ -6,7 +6,12 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { format } from 'timeago.js';
 import { UserContext } from '../../store/user';
-import { ArticleCategory, IArticleEntity, ITagEntity, IUserEntity } from '../../types';
+import {
+  ArticleCategory,
+  IArticleEntity,
+  ITagEntity,
+  IUserEntity,
+} from '../../types';
 import { useSetState } from '../../utils/commonHooks';
 import { DEFAULTAVATAR, defaultPageSize } from '../../utils/constant';
 import { articleList } from '../../utils/httpClient';
@@ -25,7 +30,7 @@ import sup from 'markdown-it-sup';
 import twemoji from 'twemoji';
 
 // 样式
-import 'highlight.js/styles/an-old-hope.css';
+import 'highlight.js/styles/base16/darcula.css';
 import 'react-markdown-editor-lite/lib/index.css';
 import styles from './articleList.module.css';
 
@@ -37,12 +42,12 @@ export interface IArtListParams {
 
 export interface IArticleListProps {
   category: ArticleCategory;
-  articles: IArticleEntity[],
-  users: IUserEntity[],
-  tags: ITagEntity[],
+  articles: IArticleEntity[];
+  users: IUserEntity[];
+  tags: ITagEntity[];
   total: number;
-  current: number,
-  pageSize: number,
+  current: number;
+  pageSize: number;
 }
 
 interface IArticleListState {
@@ -55,13 +60,17 @@ interface IArticleListState {
 
 function Array2Map<T extends { id?: string }>(arr: T[]): { [id: string]: T } {
   const dataMap: { [id: string]: T } = {};
-  arr.forEach(data => {
+  arr.forEach((data) => {
     dataMap[data.id!] = data;
   });
   return dataMap;
 }
 
-export function parseQuery(query: ParsedUrlQuery): { current: number, pageSize: number, searchValue: string } {
+export function parseQuery(query: ParsedUrlQuery): {
+  current: number;
+  pageSize: number;
+  searchValue: string;
+} {
   const { keyword: search, current: cur, pageSize: size } = query;
 
   let searchValue = '';
@@ -104,7 +113,7 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
           return hljs.highlight(lang, code).value;
         }
         return hljs.highlightAuto(code).value;
-      }
+      },
     });
 
     _md.use(emoji).use(mark).use(ins).use(abbr).use(sup).use(sub);
@@ -116,25 +125,26 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
     return _md;
   }, []);
 
-  const [articleListState, setArticleListState] = useSetState<IArticleListState>(() => {
-    const { articles, tags, users, total, current, pageSize } = props;
-    const userMap = Array2Map(users);
-    const tagMap = Array2Map(tags);
+  const [articleListState, setArticleListState] =
+    useSetState<IArticleListState>(() => {
+      const { articles, tags, users, total, current, pageSize } = props;
+      const userMap = Array2Map(users);
+      const tagMap = Array2Map(tags);
 
-    return {
-      articles,
-      userMap,
-      tagMap,
-      loading: false,
-      pagination: {
-        current,
-        pageSize,
-        showQuickJumper: false,
-        hideOnSinglePage: true,
-        total,
-      },
-    };
-  });
+      return {
+        articles,
+        userMap,
+        tagMap,
+        loading: false,
+        pagination: {
+          current,
+          pageSize,
+          showQuickJumper: false,
+          hideOnSinglePage: true,
+          total,
+        },
+      };
+    });
 
   const getArticleList = async (params: IArtListParams) => {
     try {
@@ -163,7 +173,8 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
   };
 
   const isFirstRender = useRef(true);
-  const artListRef = useRef<(params: IArtListParams) => Promise<void>>(getArticleList);
+  const artListRef =
+    useRef<(params: IArtListParams) => Promise<void>>(getArticleList);
   artListRef.current = getArticleList;
 
   useEffect(() => {
@@ -173,11 +184,21 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
     }
 
     const { current, pageSize, searchValue } = parseQuery(router.query);
-    const params: IArtListParams = { category: props.category, pagination: { current, pageSize }, searchValue };
+    const params: IArtListParams = {
+      category: props.category,
+      pagination: { current, pageSize },
+      searchValue,
+    };
 
     artListRef.current(params);
     // eslint-disable-next-line
-  }, [userContext.userState, props.category, router.query.current, router.query.pageSize, router.query.keyword]);
+  }, [
+    userContext.userState,
+    props.category,
+    router.query.current,
+    router.query.pageSize,
+    router.query.keyword,
+  ]);
 
   return (
     <div style={{ paddingBottom: 15 }}>
@@ -190,24 +211,36 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
           itemRender: (
             page: number,
             type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next',
-            originalElement: React.ReactElement<HTMLElement, string | React.JSXElementConstructor<any>>,
+            originalElement: React.ReactElement<
+              HTMLElement,
+              string | React.JSXElementConstructor<any>
+            >
           ) => {
             const { pageSize, searchValue } = parseQuery(router.query);
             return (
-              <Link href={`${router.pathname}?current=${page}&pageSize=${pageSize}${searchValue ? `&keyword=${searchValue}` : ''}`}>
+              <Link
+                href={`${router.pathname}?current=${page}&pageSize=${pageSize}${
+                  searchValue ? `&keyword=${searchValue}` : ''
+                }`}
+              >
                 {originalElement}
               </Link>
             );
           },
         }}
         dataSource={articleListState.articles}
-        renderItem={item => (
-          <List.Item
-            key={item.title}
-          >
+        renderItem={(item) => (
+          <List.Item key={item.title}>
             <div className={styles.title}>
               <div className={styles.user_avatar}>
-                <Avatar size={50} src={articleListState.userMap[item.createdBy!] ? articleListState.userMap[item.createdBy!].avatar : DEFAULTAVATAR} />
+                <Avatar
+                  size={50}
+                  src={
+                    articleListState.userMap[item.createdBy!]
+                      ? articleListState.userMap[item.createdBy!].avatar
+                      : DEFAULTAVATAR
+                  }
+                />
               </div>
               <div className={styles.article_title}>
                 <div className={styles.article_title_name}>
@@ -216,30 +249,46 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
                   </Link>
                 </div>
                 <div className={styles.article_title_others}>
-                  {
-                    item.tags && item.tags.map(tagId => {
+                  {item.tags &&
+                    item.tags.map((tagId) => {
                       return (
                         <Tag
-                          color={articleListState.tagMap[tagId] ? articleListState.tagMap[tagId].color : undefined}
+                          color={
+                            articleListState.tagMap[tagId]
+                              ? articleListState.tagMap[tagId].color
+                              : undefined
+                          }
                           key={tagId}
                         >
-                          {articleListState.tagMap[tagId] ? articleListState.tagMap[tagId].name : '不存在的标签'}
+                          {articleListState.tagMap[tagId]
+                            ? articleListState.tagMap[tagId].name
+                            : '不存在的标签'}
                         </Tag>
                       );
-                    })
-                  }
+                    })}
                   <span className={styles.article_title_timeago}>
-                    {
-                      item.createdTime === item.modifyTime ?
-                        `${articleListState.userMap[item.createdBy!] ? articleListState.userMap[item.createdBy!].nickname : '神秘人'} 发表于 ${format(item.createdTime!, 'zh_CN')}` :
-                        `${articleListState.userMap[item.modifyBy!] ? articleListState.userMap[item.modifyBy!].nickname : '神秘人'} 更新于 ${format(item.modifyTime as number, 'zh_CN')}`
-                    }
+                    {item.createdTime === item.modifyTime
+                      ? `${
+                          articleListState.userMap[item.createdBy!]
+                            ? articleListState.userMap[item.createdBy!].nickname
+                            : '神秘人'
+                        } 发表于 ${format(item.createdTime!, 'zh_CN')}`
+                      : `${
+                          articleListState.userMap[item.modifyBy!]
+                            ? articleListState.userMap[item.modifyBy!].nickname
+                            : '神秘人'
+                        } 更新于 ${format(item.modifyTime as number, 'zh_CN')}`}
                   </span>
                 </div>
               </div>
             </div>
             <CoverLazyLoad articleId={item.id!} coverURL={item.coverPicture!} />
-            <div className="custom-html-style" dangerouslySetInnerHTML={{ __html: md.render(item.desc || '这家伙很懒，什么都没留下') }} />
+            <div
+              className="custom-html-style"
+              dangerouslySetInnerHTML={{
+                __html: md.render(item.desc || '这家伙很懒，什么都没留下'),
+              }}
+            />
             <ArticleActionsLazyLoad article={item} />
           </List.Item>
         )}
