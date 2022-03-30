@@ -101,9 +101,13 @@ const ArticleEdit: FC<IArticleEditProps> = (props) => {
       langPrefix: 'uranus-article-code hljs ',
       highlight: (code, lang) => {
         if (lang && hljs.getLanguage(lang)) {
-          return hljs.highlight(lang, code).value;
+          return `<pre class="uranus-article-code-container"><code class="uranus-article-code hljs ${lang}">${
+            hljs.highlight(code, { language: lang, ignoreIllegals: true }).value
+          }</code></pre>`;
         }
-        return hljs.highlightAuto(code).value;
+        return `<pre class="uranus-article-code-container"><code class="hljs">${
+          hljs.highlightAuto(code).value
+        }</code></pre>`;
       },
     });
 
@@ -344,9 +348,10 @@ const ArticleEdit: FC<IArticleEditProps> = (props) => {
         router.push(`${baseURL}${result.data.data.id}`);
       }
     } catch (ex) {
+      const reason = ex as any;
       Modal.error({
         title: '保存失败',
-        content: ex.message as string,
+        content: reason.message as string,
       });
       setSaving(false);
     }

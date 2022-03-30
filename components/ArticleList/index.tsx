@@ -110,9 +110,13 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
       langPrefix: 'uranus-article-code hljs ',
       highlight: (code, lang) => {
         if (lang && hljs.getLanguage(lang)) {
-          return hljs.highlight(lang, code).value;
+          return `<pre class="uranus-article-code-container"><code class="uranus-article-code hljs ${lang}">${
+            hljs.highlight(code, { language: lang, ignoreIllegals: true }).value
+          }</code></pre>`;
         }
-        return hljs.highlightAuto(code).value;
+        return `<pre class="uranus-article-code-container"><code class="hljs">${
+          hljs.highlightAuto(code).value
+        }</code></pre>`;
       },
     });
 
@@ -167,7 +171,8 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
         },
       });
     } catch (ex) {
-      message.error(ex.message);
+      const reason = ex as any;
+      message.error(reason.message);
       setArticleListState({ loading: false });
     }
   };
