@@ -16,10 +16,8 @@ import {
   PayType,
   TokenType,
 } from '../types';
-import { baseURL } from './constant';
 
 const httpClient = axios.create({
-  baseURL,
   timeout: 5000,
   withCredentials: process.env.NODE_ENV === 'development' ? true : false, // 允许跨域 cookie
   headers: { 'X-Requested-With': 'XMLHttpRequest' },
