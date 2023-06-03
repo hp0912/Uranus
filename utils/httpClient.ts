@@ -18,7 +18,8 @@ import {
 } from '../types';
 
 const httpClient = axios.create({
-  baseURL: 'http://uranus-backend:9000',
+  baseURL:
+    typeof window === 'undefined' ? 'http://uranus-backend:9000' : undefined,
   timeout: 5000,
   withCredentials: process.env.NODE_ENV === 'development' ? true : false, // 允许跨域 cookie
   headers: { 'X-Requested-With': 'XMLHttpRequest' },
