@@ -10,18 +10,18 @@ const UserSettings = () => {
   return (
     <>
       <Content
-        left={(
+        left={
           <>
             <UranusAvatar />
             <Advertisement01 />
           </>
-        )}
-        right={(
+        }
+        right={
           <>
             <UranusMotto />
             <Advertisement02 />
           </>
-        )}
+        }
       >
         <CUserSettings />
       </Content>
@@ -31,10 +31,12 @@ const UserSettings = () => {
 
 export default UserSettings;
 
+export const runtime = 'edge';
+
 export async function getStaticProps() {
   return {
     props: {
       userState: null,
-    }
+    },
   };
 }

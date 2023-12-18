@@ -1,5 +1,23 @@
-import { DeleteOutlined, EditOutlined, FormOutlined, LoadingOutlined, PauseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Breadcrumb, Button, Col, Input, message, Popconfirm, Row, Switch, Table, Tooltip } from 'antd';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  FormOutlined,
+  LoadingOutlined,
+  PauseCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
+import {
+  Breadcrumb,
+  Button,
+  Col,
+  Input,
+  message,
+  Popconfirm,
+  Row,
+  Switch,
+  Table,
+  Tooltip,
+} from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/lib/table/interface';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
@@ -7,7 +25,11 @@ import { GetServerSideProps } from 'next';
 import { AuditStatus, IArticleEntity, IUserEntity } from '../../types';
 import { formatDate } from '../../utils';
 import { useSetState } from '../../utils/commonHooks';
-import { articleAudit, articleDeleteForAdmin, articleListForAdmin } from '../../utils/httpClient';
+import {
+  articleAudit,
+  articleDeleteForAdmin,
+  articleListForAdmin,
+} from '../../utils/httpClient';
 
 // 样式
 import componentStyles from '../../components/components.module.css';
@@ -76,7 +98,9 @@ const ArticleManagement: FC = () => {
             checkedChildren="审核通过"
             unCheckedChildren="待审核"
             checked={auditStatus === AuditStatus.approved}
-            onChange={(checked: boolean) => { onAuditStatusChange(checked, item.id); }}
+            onChange={(checked: boolean) => {
+              onAuditStatusChange(checked, item.id);
+            }}
           />
         );
       },
@@ -121,111 +145,153 @@ const ArticleManagement: FC = () => {
         return (
           <>
             {
-              (
-                <a href={`/admin/article_edit/${record.id}`} target="_blank" rel="noopener noreferrer">
-                  <EditOutlined className="uranus-margin-right-8" />
-                </a>
-              )
+              <a
+                href={`/admin/article_edit/${record.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <EditOutlined className="uranus-margin-right-8" />
+              </a>
             }
-            {
-              adminAriState.deleting && adminAriState.currentOPId === record.id ?
-                <LoadingOutlined /> :
-                adminAriState.deleting ?
-                  <PauseCircleOutlined /> :
-                  (
-                    <Popconfirm
-                      title="确定要删除该文章吗？"
-                      okText="确认"
-                      cancelText="取消"
-                      icon={<QuestionCircleOutlined className={componentStyles.uranus_delete_icon} />}
-                      onConfirm={() => { onArticleDelete(record.id); }}
-                    >
-                      <Tooltip title="删除">
-                        <DeleteOutlined />
-                      </Tooltip>
-                    </Popconfirm>
-                  )
-            }
+            {adminAriState.deleting &&
+            adminAriState.currentOPId === record.id ? (
+              <LoadingOutlined />
+            ) : adminAriState.deleting ? (
+              <PauseCircleOutlined />
+            ) : (
+              <Popconfirm
+                title="确定要删除该文章吗？"
+                okText="确认"
+                cancelText="取消"
+                icon={
+                  <QuestionCircleOutlined
+                    className={componentStyles.uranus_delete_icon}
+                  />
+                }
+                onConfirm={() => {
+                  onArticleDelete(record.id);
+                }}
+              >
+                <Tooltip title="删除">
+                  <DeleteOutlined />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </>
         );
       },
     },
   ];
 
-  const onAction = useCallback(async (action: () => Promise<void>) => {
-    try {
-      setAdminAriState({ loading: true });
-      const { pagination: { current, pageSize }, searchValue } = adminAriState;
+  const onAction = useCallback(
+    async (action: () => Promise<void>) => {
+      try {
+        setAdminAriState({ loading: true });
+        const {
+          pagination: { current, pageSize },
+          searchValue,
+        } = adminAriState;
 
-      await action();
-      const articlesResult = await articleListForAdmin({ pagination: { current, pageSize }, searchValue });
-      const { articles, users, total } = articlesResult.data.data;
+        await action();
+        const articlesResult = await articleListForAdmin({
+          pagination: { current, pageSize },
+          searchValue,
+        });
+        const { articles, users, total } = articlesResult.data.data;
 
-      const _userMap: { [userId: string]: IUserEntity } = {};
-      (users as IUserEntity[]).forEach(user => {
-        _userMap[user.id as string] = user;
-      });
+        const _userMap: { [userId: string]: IUserEntity } = {};
+        (users as IUserEntity[]).forEach((user) => {
+          _userMap[user.id as string] = user;
+        });
 
-      setAdminAriState({
-        loading: false,
-        data: articles,
-        pagination: {
-          ...adminAriState.pagination,
-          total,
-        },
-      });
-      setUserMap(_userMap);
-    } catch (ex) {
-      message.error(ex.message);
-      setAdminAriState({ loading: false });
-    }
-  }, [adminAriState, setAdminAriState]);
-
-  const onAuditStatusChange = useCallback(async (checked: boolean, articleId?: string) => {
-    onAction(async () => { await articleAudit({ articleId: articleId as string, auditStatus: checked ? AuditStatus.approved : AuditStatus.unapprove }); });
-  }, [onAction]);
-
-  const onArticleDelete = useCallback(async (articleId?: string) => {
-    onAction(async () => { await articleDeleteForAdmin({ articleId: articleId as string }); });
-  }, [onAction]);
-
-  const getArticleList = useCallback(async (params?: IAdminArtListParams) => {
-    try {
-      if (!params) {
-        params = { pagination: { current: 1, pageSize: 15 }, searchValue: adminAriState.searchValue };
+        setAdminAriState({
+          loading: false,
+          data: articles,
+          pagination: {
+            ...adminAriState.pagination,
+            total,
+          },
+        });
+        setUserMap(_userMap);
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setAdminAriState({ loading: false });
       }
+    },
+    [adminAriState, setAdminAriState]
+  );
 
-      setAdminAriState({ loading: true });
-
-      const articlesResult = await articleListForAdmin(params);
-      const { articles, users, total } = articlesResult.data.data;
-
-      const _userMap: { [userId: string]: IUserEntity } = {};
-      (users as IUserEntity[]).forEach(user => {
-        _userMap[user.id as string] = user;
+  const onAuditStatusChange = useCallback(
+    async (checked: boolean, articleId?: string) => {
+      onAction(async () => {
+        await articleAudit({
+          articleId: articleId as string,
+          auditStatus: checked ? AuditStatus.approved : AuditStatus.unapprove,
+        });
       });
+    },
+    [onAction]
+  );
 
-      setUserMap(_userMap);
-      setAdminAriState({
-        loading: false,
-        data: articles,
-        pagination: {
-          ...adminAriState.pagination,
-          ...params.pagination,
-          total,
-        },
+  const onArticleDelete = useCallback(
+    async (articleId?: string) => {
+      onAction(async () => {
+        await articleDeleteForAdmin({ articleId: articleId as string });
       });
-    } catch (ex) {
-      message.error(ex.message);
-      setAdminAriState({ loading: false });
-    }
-    // eslint-disable-next-line
-  }, [adminAriState]);
+    },
+    [onAction]
+  );
 
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setAdminAriState({ searchValue: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const getArticleList = useCallback(
+    async (params?: IAdminArtListParams) => {
+      try {
+        if (!params) {
+          params = {
+            pagination: { current: 1, pageSize: 15 },
+            searchValue: adminAriState.searchValue,
+          };
+        }
+
+        setAdminAriState({ loading: true });
+
+        const articlesResult = await articleListForAdmin(params);
+        const { articles, users, total } = articlesResult.data.data;
+
+        const _userMap: { [userId: string]: IUserEntity } = {};
+        (users as IUserEntity[]).forEach((user) => {
+          _userMap[user.id as string] = user;
+        });
+
+        setUserMap(_userMap);
+        setAdminAriState({
+          loading: false,
+          data: articles,
+          pagination: {
+            ...adminAriState.pagination,
+            ...params.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setAdminAriState({ loading: false });
+      }
+      // eslint-disable-next-line
+    },
+    [adminAriState]
+  );
+
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setAdminAriState({ searchValue: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSearch = useCallback(() => {
     if (adminAriState.loading) {
@@ -234,10 +300,13 @@ const ArticleManagement: FC = () => {
     getArticleList();
   }, [adminAriState.loading, getArticleList]);
 
-  const onTableChange = useCallback((pagination: TablePaginationConfig) => {
-    const params = { pagination, searchValue: adminAriState.searchValue };
-    getArticleList(params);
-  }, [adminAriState.searchValue, getArticleList]);
+  const onTableChange = useCallback(
+    (pagination: TablePaginationConfig) => {
+      const params = { pagination, searchValue: adminAriState.searchValue };
+      getArticleList(params);
+    },
+    [adminAriState.searchValue, getArticleList]
+  );
 
   const articleAdd = useCallback(() => {
     router.push('/admin/article_edit/new');
@@ -289,11 +358,13 @@ const ArticleManagement: FC = () => {
 
 export default ArticleManagement;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       userState: null,
       isAdmin: true,
-    }
+    },
   };
 };

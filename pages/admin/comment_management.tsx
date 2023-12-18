@@ -1,12 +1,31 @@
 import React, { FC, useCallback, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
-import { DeleteOutlined, LoadingOutlined, PauseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Breadcrumb, Col, Input, message, Popconfirm, Row, Switch, Table, Tooltip } from 'antd';
+import {
+  DeleteOutlined,
+  LoadingOutlined,
+  PauseCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
+import {
+  Breadcrumb,
+  Col,
+  Input,
+  message,
+  Popconfirm,
+  Row,
+  Switch,
+  Table,
+  Tooltip,
+} from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/lib/table/interface';
 import { CommentType, ICommentEntity } from '../../types';
 import { formatDate } from '../../utils';
 import { useSetState } from '../../utils/commonHooks';
-import { commentAudit, commentDeleteForAdmin, commentListForAdmin } from '../../utils/httpClient';
+import {
+  commentAudit,
+  commentDeleteForAdmin,
+  commentListForAdmin,
+} from '../../utils/httpClient';
 
 // 样式
 import CommentStyles from '../../components/UranusComment/comment.module.css';
@@ -54,7 +73,12 @@ const CommentManagement: FC = () => {
       align: 'left',
       ellipsis: true,
       render: (text: string) => {
-        return <div className={CommentStyles.container} dangerouslySetInnerHTML={{ __html: text }} />;
+        return (
+          <div
+            className={CommentStyles.container}
+            dangerouslySetInnerHTML={{ __html: text }}
+          />
+        );
       },
     },
     {
@@ -101,7 +125,9 @@ const CommentManagement: FC = () => {
             checkedChildren="审核通过"
             unCheckedChildren="审核不通过"
             checked={passed}
-            onChange={(checked: boolean) => { onCommentPassedChange(checked, item.id!); }}
+            onChange={(checked: boolean) => {
+              onCommentPassedChange(checked, item.id!);
+            }}
           />
         );
       },
@@ -114,115 +140,153 @@ const CommentManagement: FC = () => {
       render: (e, item) => {
         return (
           <>
-            {
-              commentsState.deleting && commentsState.currentOPId === item.id ?
-                <LoadingOutlined /> :
-                commentsState.deleting ?
-                  <PauseCircleOutlined /> :
-                  (
-                    <Popconfirm
-                      title="确定要删除该评论吗？"
-                      okText="确认"
-                      cancelText="取消"
-                      icon={<QuestionCircleOutlined className={componentStyles.uranus_delete_icon} />}
-                      onConfirm={() => { onCommentDelete(item.id!); }}
-                    >
-                      <Tooltip title="删除">
-                        <DeleteOutlined />
-                      </Tooltip>
-                    </Popconfirm>
-                  )
-            }
+            {commentsState.deleting && commentsState.currentOPId === item.id ? (
+              <LoadingOutlined />
+            ) : commentsState.deleting ? (
+              <PauseCircleOutlined />
+            ) : (
+              <Popconfirm
+                title="确定要删除该评论吗？"
+                okText="确认"
+                cancelText="取消"
+                icon={
+                  <QuestionCircleOutlined
+                    className={componentStyles.uranus_delete_icon}
+                  />
+                }
+                onConfirm={() => {
+                  onCommentDelete(item.id!);
+                }}
+              >
+                <Tooltip title="删除">
+                  <DeleteOutlined />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </>
         );
       },
     },
   ];
 
-  const onCommentPassedChange = useCallback(async (checked: boolean, commentId: string) => {
-    try {
-      setCommentsState({ loading: true });
-      const { pagination: { current, pageSize }, searchValue } = commentsState;
+  const onCommentPassedChange = useCallback(
+    async (checked: boolean, commentId: string) => {
+      try {
+        setCommentsState({ loading: true });
+        const {
+          pagination: { current, pageSize },
+          searchValue,
+        } = commentsState;
 
-      await commentAudit({ commentId, passed: checked });
-      const commentsResult = await commentListForAdmin({ pagination: { current, pageSize }, searchValue });
-      const { comments, total } = commentsResult.data.data;
+        await commentAudit({ commentId, passed: checked });
+        const commentsResult = await commentListForAdmin({
+          pagination: { current, pageSize },
+          searchValue,
+        });
+        const { comments, total } = commentsResult.data.data;
 
-      setCommentsState({
-        loading: false,
-        data: comments,
-        pagination: {
-          ...commentsState.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setCommentsState({ loading: false });
-    }
-  }, [commentsState, setCommentsState]);
-
-  const onCommentDelete = useCallback(async (commentId: string) => {
-    try {
-      setCommentsState({ deleting: true, currentOPId: commentId });
-      const { pagination: { current, pageSize }, searchValue } = commentsState;
-
-      await commentDeleteForAdmin({ commentId });
-      const commentsResult = await commentListForAdmin({ pagination: { current, pageSize }, searchValue });
-      const { comments, total } = commentsResult.data.data;
-
-      setCommentsState({
-        deleting: false,
-        currentOPId: null,
-        data: comments,
-        pagination: {
-          ...commentsState.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setCommentsState({ deleting: false, currentOPId: null });
-    }
-  }, [commentsState, setCommentsState]);
-
-  const getComments = useCallback(async (params?: IAdminCommentsParams) => {
-    try {
-      if (!params) {
-        params = { pagination: { current: 1, pageSize: 15 }, searchValue: commentsState.searchValue };
+        setCommentsState({
+          loading: false,
+          data: comments,
+          pagination: {
+            ...commentsState.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setCommentsState({ loading: false });
       }
+    },
+    [commentsState, setCommentsState]
+  );
 
-      setCommentsState({ loading: true });
+  const onCommentDelete = useCallback(
+    async (commentId: string) => {
+      try {
+        setCommentsState({ deleting: true, currentOPId: commentId });
+        const {
+          pagination: { current, pageSize },
+          searchValue,
+        } = commentsState;
 
-      const commentsResult = await commentListForAdmin(params);
-      const { comments, total } = commentsResult.data.data;
+        await commentDeleteForAdmin({ commentId });
+        const commentsResult = await commentListForAdmin({
+          pagination: { current, pageSize },
+          searchValue,
+        });
+        const { comments, total } = commentsResult.data.data;
 
-      setCommentsState({
-        loading: false,
-        data: comments,
-        pagination: {
-          ...commentsState.pagination,
-          ...params.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setCommentsState({ loading: false });
-    }
-  }, [commentsState, setCommentsState]);
+        setCommentsState({
+          deleting: false,
+          currentOPId: null,
+          data: comments,
+          pagination: {
+            ...commentsState.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setCommentsState({ deleting: false, currentOPId: null });
+      }
+    },
+    [commentsState, setCommentsState]
+  );
 
-  const onTableChange = useCallback((
-    pagination: TablePaginationConfig,
-  ) => {
-    const params = { pagination, searchValue: commentsState.searchValue };
-    getComments(params);
-  }, [commentsState.searchValue, getComments]);
+  const getComments = useCallback(
+    async (params?: IAdminCommentsParams) => {
+      try {
+        if (!params) {
+          params = {
+            pagination: { current: 1, pageSize: 15 },
+            searchValue: commentsState.searchValue,
+          };
+        }
 
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setCommentsState({ searchValue: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+        setCommentsState({ loading: true });
+
+        const commentsResult = await commentListForAdmin(params);
+        const { comments, total } = commentsResult.data.data;
+
+        setCommentsState({
+          loading: false,
+          data: comments,
+          pagination: {
+            ...commentsState.pagination,
+            ...params.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setCommentsState({ loading: false });
+      }
+    },
+    [commentsState, setCommentsState]
+  );
+
+  const onTableChange = useCallback(
+    (pagination: TablePaginationConfig) => {
+      const params = { pagination, searchValue: commentsState.searchValue };
+      getComments(params);
+    },
+    [commentsState.searchValue, getComments]
+  );
+
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setCommentsState({ searchValue: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSearch = useCallback(() => {
     if (commentsState.loading) {
@@ -267,11 +331,13 @@ const CommentManagement: FC = () => {
 
 export default CommentManagement;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       userState: null,
       isAdmin: true,
-    }
+    },
   };
 };

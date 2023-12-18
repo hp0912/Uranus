@@ -1,5 +1,19 @@
-import { LoadingOutlined, PauseCircleOutlined, QuestionCircleOutlined, TransactionOutlined } from '@ant-design/icons';
-import { Breadcrumb, Col, Input, message, Popconfirm, Row, Table, Tooltip } from 'antd';
+import {
+  LoadingOutlined,
+  PauseCircleOutlined,
+  QuestionCircleOutlined,
+  TransactionOutlined,
+} from '@ant-design/icons';
+import {
+  Breadcrumb,
+  Col,
+  Input,
+  message,
+  Popconfirm,
+  Row,
+  Table,
+  Tooltip,
+} from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/lib/table/interface';
 import React, { FC, useCallback, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
@@ -73,7 +87,13 @@ const OrderManagement: FC = () => {
       width: '12%',
       align: 'center',
       render: (sellerId: string) => {
-        return <span>{ordersState.userMap[sellerId] ? ordersState.userMap[sellerId].nickname : '--'}</span>;
+        return (
+          <span>
+            {ordersState.userMap[sellerId]
+              ? ordersState.userMap[sellerId].nickname
+              : '--'}
+          </span>
+        );
       },
     },
     {
@@ -82,7 +102,7 @@ const OrderManagement: FC = () => {
       width: '8%',
       align: 'center',
       render: (totalPrice: number) => {
-        return <span>{(totalPrice / 100)} 元</span>;
+        return <span>{totalPrice / 100} 元</span>;
       },
     },
     {
@@ -115,7 +135,13 @@ const OrderManagement: FC = () => {
       width: '12%',
       align: 'center',
       render: (buyerId: string) => {
-        return <span>{ordersState.userMap[buyerId] ? ordersState.userMap[buyerId].nickname : '--'}</span>;
+        return (
+          <span>
+            {ordersState.userMap[buyerId]
+              ? ordersState.userMap[buyerId].nickname
+              : '--'}
+          </span>
+        );
       },
     },
     {
@@ -133,108 +159,138 @@ const OrderManagement: FC = () => {
       width: '6%',
       align: 'center',
       render: (e, item) => {
-        if (item.code !== OrderCode.success && item.code !== OrderCode.refund_fail) {
+        if (
+          item.code !== OrderCode.success &&
+          item.code !== OrderCode.refund_fail
+        ) {
           return null;
         }
 
         return (
           <>
-            {
-              ordersState.refunding && ordersState.currentOPId === item.id ?
-                <LoadingOutlined /> :
-                ordersState.refunding ?
-                  <PauseCircleOutlined /> :
-                  (
-                    <Popconfirm
-                      title="确定要对该订单发起退款吗？"
-                      okText="确认"
-                      cancelText="取消"
-                      icon={<QuestionCircleOutlined className={componentStyles.uranus_delete_icon} />}
-                      onConfirm={() => { onOrderRefund(item.id!); }}
-                    >
-                      <Tooltip title="退款">
-                        <TransactionOutlined />
-                      </Tooltip>
-                    </Popconfirm>
-                  )
-            }
+            {ordersState.refunding && ordersState.currentOPId === item.id ? (
+              <LoadingOutlined />
+            ) : ordersState.refunding ? (
+              <PauseCircleOutlined />
+            ) : (
+              <Popconfirm
+                title="确定要对该订单发起退款吗？"
+                okText="确认"
+                cancelText="取消"
+                icon={
+                  <QuestionCircleOutlined
+                    className={componentStyles.uranus_delete_icon}
+                  />
+                }
+                onConfirm={() => {
+                  onOrderRefund(item.id!);
+                }}
+              >
+                <Tooltip title="退款">
+                  <TransactionOutlined />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </>
         );
       },
     },
   ];
 
-  const onOrderRefund = useCallback(async (orderId: string) => {
-    try {
-      setOrdersState({ refunding: true, currentOPId: orderId });
-      const { pagination: { current, pageSize }, searchValue } = ordersState;
+  const onOrderRefund = useCallback(
+    async (orderId: string) => {
+      try {
+        setOrdersState({ refunding: true, currentOPId: orderId });
+        const {
+          pagination: { current, pageSize },
+          searchValue,
+        } = ordersState;
 
-      await orderRefundForAdmin({ orderId });
-      const ordersResult = await getOrdersForAdmin({ pagination: { current, pageSize }, searchValue });
-      const { orders, total } = ordersResult.data.data;
+        await orderRefundForAdmin({ orderId });
+        const ordersResult = await getOrdersForAdmin({
+          pagination: { current, pageSize },
+          searchValue,
+        });
+        const { orders, total } = ordersResult.data.data;
 
-      setOrdersState({
-        refunding: false,
-        currentOPId: null,
-        data: orders,
-        pagination: {
-          ...ordersState.pagination,
-          total,
-        },
-      });
+        setOrdersState({
+          refunding: false,
+          currentOPId: null,
+          data: orders,
+          pagination: {
+            ...ordersState.pagination,
+            total,
+          },
+        });
 
-      message.success('发起退款成功，等待服务商处理');
-    } catch (ex) {
-      message.error(ex.message);
-      setOrdersState({ refunding: false, currentOPId: null });
-    }
-    // eslint-disable-next-line
-  }, [ordersState]);
-
-  const getOrders = useCallback(async (params?: IAdminOrdersParams) => {
-    try {
-      if (!params) {
-        params = { pagination: { current: 1, pageSize: 15 }, searchValue: ordersState.searchValue };
+        message.success('发起退款成功，等待服务商处理');
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setOrdersState({ refunding: false, currentOPId: null });
       }
+      // eslint-disable-next-line
+    },
+    [ordersState]
+  );
 
-      setOrdersState({ loading: true });
+  const getOrders = useCallback(
+    async (params?: IAdminOrdersParams) => {
+      try {
+        if (!params) {
+          params = {
+            pagination: { current: 1, pageSize: 15 },
+            searchValue: ordersState.searchValue,
+          };
+        }
 
-      const ordersResult = await getOrdersForAdmin(params);
-      const { orders, users, total } = ordersResult.data.data;
-      const userMap: { [userId: string]: IUserEntity } = {};
+        setOrdersState({ loading: true });
 
-      users.forEach((user: IUserEntity) => {
-        userMap[user.id!] = user;
-      });
+        const ordersResult = await getOrdersForAdmin(params);
+        const { orders, users, total } = ordersResult.data.data;
+        const userMap: { [userId: string]: IUserEntity } = {};
 
-      setOrdersState({
-        loading: false,
-        data: orders,
-        userMap,
-        pagination: {
-          ...ordersState.pagination,
-          ...params.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setOrdersState({ loading: false });
-    }
-    // eslint-disable-next-line
-  }, [ordersState]);
+        users.forEach((user: IUserEntity) => {
+          userMap[user.id!] = user;
+        });
 
-  const onTableChange = useCallback((
-    pagination: TablePaginationConfig,
-  ) => {
-    const params = { pagination, searchValue: ordersState.searchValue };
-    getOrders(params);
-  }, [ordersState.searchValue, getOrders]);
+        setOrdersState({
+          loading: false,
+          data: orders,
+          userMap,
+          pagination: {
+            ...ordersState.pagination,
+            ...params.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setOrdersState({ loading: false });
+      }
+      // eslint-disable-next-line
+    },
+    [ordersState]
+  );
 
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setOrdersState({ searchValue: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onTableChange = useCallback(
+    (pagination: TablePaginationConfig) => {
+      const params = { pagination, searchValue: ordersState.searchValue };
+      getOrders(params);
+    },
+    [ordersState.searchValue, getOrders]
+  );
+
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setOrdersState({ searchValue: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSearch = useCallback(() => {
     if (ordersState.loading) {
@@ -279,11 +335,13 @@ const OrderManagement: FC = () => {
 
 export default OrderManagement;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       userState: null,
       isAdmin: true,
-    }
+    },
   };
 };

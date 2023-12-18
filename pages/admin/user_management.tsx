@@ -1,5 +1,17 @@
 import { BellOutlined, EditOutlined } from '@ant-design/icons';
-import { Breadcrumb, Col, DatePicker, Input, InputNumber, message, Modal, Row, Space, Switch, Table } from 'antd';
+import {
+  Breadcrumb,
+  Col,
+  DatePicker,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Row,
+  Space,
+  Switch,
+  Table,
+} from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/lib/table/interface';
 import moment, { Moment } from 'moment';
 import React, { FC, useCallback, useEffect } from 'react';
@@ -7,7 +19,11 @@ import { GetServerSideProps } from 'next';
 import { INotificationEntity, IUserEntity } from '../../types';
 import { formatDate } from '../../utils';
 import { useSetState } from '../../utils/commonHooks';
-import { sendNotification, updateUserForAdmin, userList } from '../../utils/httpClient';
+import {
+  sendNotification,
+  updateUserForAdmin,
+  userList,
+} from '../../utils/httpClient';
 
 interface IAdminUserListParams {
   searchValue: string;
@@ -48,8 +64,18 @@ const UserManagement: FC = () => {
     },
     loading: false,
   });
-  const [userEditState, setUserEditState] = useSetState<IUserEditState>({ data: null, visible: false, loading: false });
-  const [userNotiState, setUserNotiState] = useSetState<IUserNotiState>({ data: null, broadcast: false, username: null, visible: false, loading: false });
+  const [userEditState, setUserEditState] = useSetState<IUserEditState>({
+    data: null,
+    visible: false,
+    loading: false,
+  });
+  const [userNotiState, setUserNotiState] = useSetState<IUserNotiState>({
+    data: null,
+    broadcast: false,
+    username: null,
+    visible: false,
+    loading: false,
+  });
 
   useEffect(() => {
     getUserList();
@@ -64,9 +90,7 @@ const UserManagement: FC = () => {
       align: 'left',
       ellipsis: true,
       render: (text: string) => {
-        return (
-          <span>{text}</span>
-        );
+        return <span>{text}</span>;
       },
     },
     {
@@ -118,7 +142,9 @@ const UserManagement: FC = () => {
             checkedChildren="激活"
             unCheckedChildren="注销"
             checked={activated}
-            onChange={(checked: boolean) => { onUserActivatedChange(checked, item.id); }}
+            onChange={(checked: boolean) => {
+              onUserActivatedChange(checked, item.id);
+            }}
           />
         );
       },
@@ -139,7 +165,11 @@ const UserManagement: FC = () => {
             <BellOutlined
               className="uranus-margin-left-8"
               onClick={() => {
-                setUserNotiState({ data: { userId: item.id }, visible: true, username: item.nickname });
+                setUserNotiState({
+                  data: { userId: item.id },
+                  visible: true,
+                  username: item.nickname,
+                });
               }}
             />
           </>
@@ -148,66 +178,91 @@ const UserManagement: FC = () => {
     },
   ];
 
-  const onUserActivatedChange = useCallback(async (checked: boolean, userId?: string) => {
-    try {
-      setAdminUserState({ loading: true });
-      const { pagination: { current, pageSize }, searchValue } = adminUserState;
+  const onUserActivatedChange = useCallback(
+    async (checked: boolean, userId?: string) => {
+      try {
+        setAdminUserState({ loading: true });
+        const {
+          pagination: { current, pageSize },
+          searchValue,
+        } = adminUserState;
 
-      await updateUserForAdmin({ id: userId, activated: checked });
-      const usersResult = await userList({ pagination: { current, pageSize }, searchValue });
-      const { users, total } = usersResult.data.data;
+        await updateUserForAdmin({ id: userId, activated: checked });
+        const usersResult = await userList({
+          pagination: { current, pageSize },
+          searchValue,
+        });
+        const { users, total } = usersResult.data.data;
 
-      setAdminUserState({
-        loading: false,
-        data: users,
-        pagination: {
-          ...adminUserState.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setAdminUserState({ loading: false });
-    }
-    // eslint-disable-next-line
-  }, [adminUserState]);
-
-  const getUserList = useCallback(async (params?: IAdminUserListParams) => {
-    try {
-      if (!params) {
-        params = { pagination: { current: 1, pageSize: 15 }, searchValue: adminUserState.searchValue };
+        setAdminUserState({
+          loading: false,
+          data: users,
+          pagination: {
+            ...adminUserState.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setAdminUserState({ loading: false });
       }
+      // eslint-disable-next-line
+    },
+    [adminUserState]
+  );
 
-      setAdminUserState({ loading: true });
+  const getUserList = useCallback(
+    async (params?: IAdminUserListParams) => {
+      try {
+        if (!params) {
+          params = {
+            pagination: { current: 1, pageSize: 15 },
+            searchValue: adminUserState.searchValue,
+          };
+        }
 
-      const usersResult = await userList(params);
-      const { users, total } = usersResult.data.data;
+        setAdminUserState({ loading: true });
 
-      setAdminUserState({
-        loading: false,
-        data: users,
-        pagination: {
-          ...adminUserState.pagination,
-          ...params.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setAdminUserState({ loading: false });
-    }
-    // eslint-disable-next-line
-  }, [adminUserState]);
+        const usersResult = await userList(params);
+        const { users, total } = usersResult.data.data;
 
-  const onTableChange = useCallback((pagination: TablePaginationConfig) => {
-    const params = { pagination, searchValue: adminUserState.searchValue };
-    getUserList(params);
-  }, [adminUserState.searchValue, getUserList]);
+        setAdminUserState({
+          loading: false,
+          data: users,
+          pagination: {
+            ...adminUserState.pagination,
+            ...params.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setAdminUserState({ loading: false });
+      }
+      // eslint-disable-next-line
+    },
+    [adminUserState]
+  );
 
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setAdminUserState({ searchValue: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onTableChange = useCallback(
+    (pagination: TablePaginationConfig) => {
+      const params = { pagination, searchValue: adminUserState.searchValue };
+      getUserList(params);
+    },
+    [adminUserState.searchValue, getUserList]
+  );
+
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setAdminUserState({ searchValue: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSearch = useCallback(() => {
     if (adminUserState.loading) {
@@ -216,63 +271,90 @@ const UserManagement: FC = () => {
     getUserList();
   }, [adminUserState.loading, getUserList]);
 
-  const onAvatarChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const newUserProfile = Object.assign({}, userEditState.data);
-    newUserProfile.avatar = event.target.value;
-    setUserEditState({ data: newUserProfile });
-    // eslint-disable-next-line
-  }, [userEditState]);
+  const onAvatarChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newUserProfile = Object.assign({}, userEditState.data);
+      newUserProfile.avatar = event.target.value;
+      setUserEditState({ data: newUserProfile });
+      // eslint-disable-next-line
+    },
+    [userEditState]
+  );
 
-  const onNicknameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const newUserProfile = Object.assign({}, userEditState.data);
-    newUserProfile.nickname = event.target.value;
-    setUserEditState({ data: newUserProfile });
-    // eslint-disable-next-line
-  }, [userEditState]);
+  const onNicknameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newUserProfile = Object.assign({}, userEditState.data);
+      newUserProfile.nickname = event.target.value;
+      setUserEditState({ data: newUserProfile });
+      // eslint-disable-next-line
+    },
+    [userEditState]
+  );
 
-  const onAccessLevelChange = useCallback((value) => {
-    const newUserProfile = Object.assign({}, userEditState.data);
-    newUserProfile.accessLevel = value;
-    setUserEditState({ data: newUserProfile });
-    // eslint-disable-next-line
-  }, [userEditState]);
+  const onAccessLevelChange = useCallback(
+    (value) => {
+      const newUserProfile = Object.assign({}, userEditState.data);
+      newUserProfile.accessLevel = value;
+      setUserEditState({ data: newUserProfile });
+      // eslint-disable-next-line
+    },
+    [userEditState]
+  );
 
-  const onIsBannedChange = useCallback((checked: boolean) => {
-    const newUserProfile = Object.assign({}, userEditState.data);
-    newUserProfile.isBanned = checked;
-    setUserEditState({ data: newUserProfile });
-    // eslint-disable-next-line
-  }, [userEditState]);
+  const onIsBannedChange = useCallback(
+    (checked: boolean) => {
+      const newUserProfile = Object.assign({}, userEditState.data);
+      newUserProfile.isBanned = checked;
+      setUserEditState({ data: newUserProfile });
+      // eslint-disable-next-line
+    },
+    [userEditState]
+  );
 
-  const onDatePickerOk = useCallback((date: Moment) => {
-    const newUserProfile = Object.assign({}, userEditState.data);
-    newUserProfile.expires = date.toDate().getTime();
-    setUserEditState({ data: newUserProfile });
-    // eslint-disable-next-line
-  }, [userEditState]);
+  const onDatePickerOk = useCallback(
+    (date: Moment) => {
+      const newUserProfile = Object.assign({}, userEditState.data);
+      newUserProfile.expires = date.toDate().getTime();
+      setUserEditState({ data: newUserProfile });
+      // eslint-disable-next-line
+    },
+    [userEditState]
+  );
 
-  const onSignatureChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const newUserProfile = Object.assign({}, userEditState.data);
-    newUserProfile.signature = event.target.value;
-    setUserEditState({ data: newUserProfile });
-    // eslint-disable-next-line
-  }, [userEditState]);
+  const onSignatureChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newUserProfile = Object.assign({}, userEditState.data);
+      newUserProfile.signature = event.target.value;
+      setUserEditState({ data: newUserProfile });
+      // eslint-disable-next-line
+    },
+    [userEditState]
+  );
 
-  const onPersonalProfileChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newUserProfile = Object.assign({}, userEditState.data);
-    newUserProfile.personalProfile = event.target.value;
-    setUserEditState({ data: newUserProfile });
-    // eslint-disable-next-line
-  }, [userEditState]);
+  const onPersonalProfileChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newUserProfile = Object.assign({}, userEditState.data);
+      newUserProfile.personalProfile = event.target.value;
+      setUserEditState({ data: newUserProfile });
+      // eslint-disable-next-line
+    },
+    [userEditState]
+  );
 
   const onOk = useCallback(async () => {
     try {
       setUserEditState({ loading: true });
       setAdminUserState({ loading: true });
-      const { pagination: { current, pageSize }, searchValue } = adminUserState;
+      const {
+        pagination: { current, pageSize },
+        searchValue,
+      } = adminUserState;
 
       await updateUserForAdmin(userEditState.data as IUserEntity);
-      const usersResult = await userList({ pagination: { current, pageSize }, searchValue });
+      const usersResult = await userList({
+        pagination: { current, pageSize },
+        searchValue,
+      });
       const { users, total } = usersResult.data.data;
 
       setUserEditState({ data: null, visible: false, loading: false });
@@ -287,7 +369,9 @@ const UserManagement: FC = () => {
 
       message.success('保存成功');
     } catch (ex) {
-      message.error('保存失败：' + ex.message);
+      if (ex instanceof Error) {
+        message.error('保存失败：' + ex.message);
+      }
       setUserEditState({ loading: false });
     }
     // eslint-disable-next-line
@@ -303,26 +387,35 @@ const UserManagement: FC = () => {
     // eslint-disable-next-line
   }, []);
 
-  const onNotiTitleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const noti = Object.assign({}, userNotiState.data);
-    noti.title = event.target.value;
-    setUserNotiState({ data: noti });
-    // eslint-disable-next-line
-  }, [userNotiState]);
+  const onNotiTitleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const noti = Object.assign({}, userNotiState.data);
+      noti.title = event.target.value;
+      setUserNotiState({ data: noti });
+      // eslint-disable-next-line
+    },
+    [userNotiState]
+  );
 
-  const onNotiDescChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const noti = Object.assign({}, userNotiState.data);
-    noti.desc = event.target.value;
-    setUserNotiState({ data: noti });
-    // eslint-disable-next-line
-  }, [userNotiState]);
+  const onNotiDescChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const noti = Object.assign({}, userNotiState.data);
+      noti.desc = event.target.value;
+      setUserNotiState({ data: noti });
+      // eslint-disable-next-line
+    },
+    [userNotiState]
+  );
 
-  const onNotiContentChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const noti = Object.assign({}, userNotiState.data);
-    noti.content = event.target.value;
-    setUserNotiState({ data: noti });
-    // eslint-disable-next-line
-  }, [userNotiState]);
+  const onNotiContentChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const noti = Object.assign({}, userNotiState.data);
+      noti.content = event.target.value;
+      setUserNotiState({ data: noti });
+      // eslint-disable-next-line
+    },
+    [userNotiState]
+  );
 
   const onNotiOk = useCallback(async () => {
     try {
@@ -342,10 +435,17 @@ const UserManagement: FC = () => {
         broadcast: userNotiState.broadcast,
       });
 
-      setUserNotiState({ loading: false, visible: false, data: null, username: null });
+      setUserNotiState({
+        loading: false,
+        visible: false,
+        data: null,
+        username: null,
+      });
       message.success('发送成功');
     } catch (ex) {
-      message.error('发送失败：' + ex.message);
+      if (ex instanceof Error) {
+        message.error('发送失败：' + ex.message);
+      }
       setUserNotiState({ loading: false });
     }
     // eslint-disable-next-line
@@ -396,44 +496,55 @@ const UserManagement: FC = () => {
         >
           <div>
             <Row className="uranus-row">
-              <Col span={5}>
-                用户昵称：
-              </Col>
+              <Col span={5}>用户昵称：</Col>
               <Col span={19}>
-                <Input value={userEditState.data?.nickname} onChange={onNicknameChange} />
+                <Input
+                  value={userEditState.data?.nickname}
+                  onChange={onNicknameChange}
+                />
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                用户头像：
-              </Col>
+              <Col span={5}>用户头像：</Col>
               <Col span={19}>
-                <Input value={userEditState.data?.avatar} onChange={onAvatarChange} />
+                <Input
+                  value={userEditState.data?.avatar}
+                  onChange={onAvatarChange}
+                />
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                权限等级：
-              </Col>
+              <Col span={5}>权限等级：</Col>
               <Col span={19}>
-                <InputNumber value={userEditState.data?.accessLevel} precision={0} onChange={onAccessLevelChange} />
+                <InputNumber
+                  value={userEditState.data?.accessLevel}
+                  precision={0}
+                  onChange={onAccessLevelChange}
+                />
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                禁言：
-              </Col>
+              <Col span={5}>禁言：</Col>
               <Col span={19}>
                 <Space>
-                  <Switch checked={!!userEditState.data?.isBanned} onChange={onIsBannedChange} />
-                  <DatePicker showTime value={userEditState.data?.expires ? moment(userEditState.data?.expires) : null} onOk={onDatePickerOk} />
+                  <Switch
+                    checked={!!userEditState.data?.isBanned}
+                    onChange={onIsBannedChange}
+                  />
+                  <DatePicker
+                    showTime
+                    value={
+                      userEditState.data?.expires
+                        ? moment(userEditState.data?.expires)
+                        : null
+                    }
+                    onOk={onDatePickerOk}
+                  />
                 </Space>
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                个性签名：
-              </Col>
+              <Col span={5}>个性签名：</Col>
               <Col span={19}>
                 <Input
                   placeholder="个性签名，三十个字以内"
@@ -443,9 +554,7 @@ const UserManagement: FC = () => {
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                个人简介：
-              </Col>
+              <Col span={5}>个人简介：</Col>
               <Col span={19}>
                 <Input.TextArea
                   autoSize={{ minRows: 3, maxRows: 6 }}
@@ -468,33 +577,31 @@ const UserManagement: FC = () => {
         >
           <div>
             <Row className="uranus-row">
-              <Col span={5}>
-                当前用户：
-              </Col>
+              <Col span={5}>当前用户：</Col>
               <Col span={19}>
                 <span>{userNotiState.username}</span>
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                标题：
-              </Col>
+              <Col span={5}>标题：</Col>
               <Col span={19}>
-                <Input value={userNotiState.data?.title} onChange={onNotiTitleChange} />
+                <Input
+                  value={userNotiState.data?.title}
+                  onChange={onNotiTitleChange}
+                />
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                备注：
-              </Col>
+              <Col span={5}>备注：</Col>
               <Col span={19}>
-                <Input value={userNotiState.data?.desc} onChange={onNotiDescChange} />
+                <Input
+                  value={userNotiState.data?.desc}
+                  onChange={onNotiDescChange}
+                />
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                内容：
-              </Col>
+              <Col span={5}>内容：</Col>
               <Col span={19}>
                 <Input.TextArea
                   autoSize={{ minRows: 3, maxRows: 6 }}
@@ -504,11 +611,12 @@ const UserManagement: FC = () => {
               </Col>
             </Row>
             <Row className="uranus-row">
-              <Col span={5}>
-                全体广播：
-              </Col>
+              <Col span={5}>全体广播：</Col>
               <Col span={19}>
-                <Switch checked={userNotiState.broadcast} onChange={onBroadcastChange} />
+                <Switch
+                  checked={userNotiState.broadcast}
+                  onChange={onBroadcastChange}
+                />
               </Col>
             </Row>
           </div>
@@ -520,11 +628,13 @@ const UserManagement: FC = () => {
 
 export default UserManagement;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       userState: null,
       isAdmin: true,
-    }
+    },
   };
 };

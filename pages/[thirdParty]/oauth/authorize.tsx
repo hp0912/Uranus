@@ -36,58 +36,83 @@ const ThirdPartyOAuth: FC = () => {
           break;
       }
 
-      oauth(code).then(() => {
-        const { browser } = browserDetect(window.navigator.userAgent);
-        const URL = window.localStorage.getItem('OAUTH_LOGIN_URL');
+      oauth(code)
+        .then(() => {
+          const { browser } = browserDetect(window.navigator.userAgent);
+          const URL = window.localStorage.getItem('OAUTH_LOGIN_URL');
 
-        if (browser.wechat && URL) {
-          window.location.href = URL;
-        } else {
-          setTimeout(() => {
-            if (window.opener) {
-              window.close();
-            } else {
-              router.back();
-            }
-          }, 3000);
-        }
-      }).catch(reason => {
-        Modal.error({
-          title: '授权失败',
-          content: reason.message,
-          onOk: () => {
-            window.close();
+          if (browser.wechat && URL) {
+            window.location.href = URL;
+          } else {
+            setTimeout(() => {
+              if (window.opener) {
+                window.close();
+              } else {
+                router.back();
+              }
+            }, 3000);
           }
+        })
+        .catch((reason) => {
+          Modal.error({
+            title: '授权失败',
+            content: reason.message,
+            onOk: () => {
+              window.close();
+            },
+          });
         });
-      });
     }
   }, [code, router]);
 
   return (
-    <div style={{ height: 'calc(100vh - 40px)', paddingTop: 50, marginBottom: 40 }}>
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', padding: 10, textAlign: 'center' }}>
-        {
-          thirdPartyState === ThirdParty.github ?
-            (
-              <>
-                <Avatar className={styles.uranus_oauth} size={80} icon={<GithubOutlined />} />
-                <p style={{ marginTop: 15, fontWeight: 600, color: '#fff' }}>GitHub授权登录中，请稍候～</p>
-              </>
-            ) :
-            thirdPartyState === ThirdParty.qq ?
-              (
-                <>
-                  <Avatar className={styles.uranus_oauth} size={80} icon={<QqOutlined />} />
-                  <p style={{ marginTop: 15, fontWeight: 600, color: '#fff' }}>QQ授权登录中，请稍候～</p>
-                </>
-              ) :
-              (
-                <>
-                  <Avatar className={styles.uranus_oauth} size={80} icon={<StopOutlined />} />
-                  <p style={{ marginTop: 15, fontWeight: 600, color: '#fff' }}>非法的请求</p>
-                </>
-              )
-        }
+    <div
+      style={{ height: 'calc(100vh - 40px)', paddingTop: 50, marginBottom: 40 }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          padding: 10,
+          textAlign: 'center',
+        }}
+      >
+        {thirdPartyState === ThirdParty.github ? (
+          <>
+            <Avatar
+              className={styles.uranus_oauth}
+              size={80}
+              icon={<GithubOutlined />}
+            />
+            <p style={{ marginTop: 15, fontWeight: 600, color: '#fff' }}>
+              GitHub授权登录中，请稍候～
+            </p>
+          </>
+        ) : thirdPartyState === ThirdParty.qq ? (
+          <>
+            <Avatar
+              className={styles.uranus_oauth}
+              size={80}
+              icon={<QqOutlined />}
+            />
+            <p style={{ marginTop: 15, fontWeight: 600, color: '#fff' }}>
+              QQ授权登录中，请稍候～
+            </p>
+          </>
+        ) : (
+          <>
+            <Avatar
+              className={styles.uranus_oauth}
+              size={80}
+              icon={<StopOutlined />}
+            />
+            <p style={{ marginTop: 15, fontWeight: 600, color: '#fff' }}>
+              非法的请求
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
@@ -95,11 +120,13 @@ const ThirdPartyOAuth: FC = () => {
 
 export default ThirdPartyOAuth;
 
+export const runtime = 'edge';
+
 export async function getStaticProps() {
   return {
     props: {
       userState: null,
-    }
+    },
   };
 }
 
@@ -111,4 +138,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     ],
     fallback: false,
   };
-}
+};

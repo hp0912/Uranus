@@ -8,32 +8,35 @@ import { PageLoading } from '../../../components/PageLoading';
 import { UranusAvatar } from '../../../components/UranusAvatar';
 import { UranusMotto } from '../../../components/UranusMotto';
 
-const ArticleEditWithNoSSR = dynamic(() => import('../../../components/ArticleEdit'), {
-  ssr: false,
-  loading: ({ isLoading }) => {
-    if (isLoading) {
-      return <PageLoading />;
-    }
-    return null;
-  },
-});
+const ArticleEditWithNoSSR = dynamic(
+  () => import('../../../components/ArticleEdit'),
+  {
+    ssr: false,
+    loading: ({ isLoading }) => {
+      if (isLoading) {
+        return <PageLoading />;
+      }
+      return null;
+    },
+  }
+);
 
 const ArticleEditPage: FC = () => {
   return (
     <>
       <Content
-        left={(
+        left={
           <>
             <UranusAvatar />
             <Advertisement01 />
           </>
-        )}
-        right={(
+        }
+        right={
           <>
             <UranusMotto />
             <Advertisement02 />
           </>
-        )}
+        }
       >
         <ArticleEditWithNoSSR breadcrumbClassName="uranus-admin-breadcrumb-frontend" />
       </Content>
@@ -43,10 +46,12 @@ const ArticleEditPage: FC = () => {
 
 export default ArticleEditPage;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       userState: null,
-    }
+    },
   };
 };

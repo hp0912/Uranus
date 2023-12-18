@@ -10,23 +10,35 @@ import { IUserEntity } from '../types';
 import { userStatus } from '../utils/httpClient';
 
 // 样式
-import '../styles/global.css'
+import '../styles/global.css';
 
-export default function App<T extends { userState: IUserEntity | null, isAdmin?: boolean }>({ Component, pageProps }: { Component: React.FunctionComponent, pageProps: T }) {
-  const [userState, userDispatch] = useReducer<(
-    preState: IUserEntity | null,
-    action: { type: string, data: IUserEntity | null },
-  ) => IUserEntity | null>(reducer, pageProps.userState);
+export default function App<
+  T extends { userState: IUserEntity | null; isAdmin?: boolean }
+>({
+  Component,
+  pageProps,
+}: {
+  Component: React.FunctionComponent;
+  pageProps: T;
+}) {
+  const [userState, userDispatch] = useReducer<
+    (
+      preState: IUserEntity | null,
+      action: { type: string; data: IUserEntity | null }
+    ) => IUserEntity | null
+  >(reducer, pageProps.userState);
 
   const userStateRef = useRef<IUserEntity | null>(pageProps.userState);
 
   useEffect(() => {
     if (!userStateRef.current) {
-      userStatus(null).then(result => {
-        userDispatch({ type: SETUSER, data: result.data.data });
-      }).catch(reason => {
-        message.error(reason.message);
-      });
+      userStatus(null)
+        .then((result) => {
+          userDispatch({ type: SETUSER, data: result.data.data });
+        })
+        .catch((reason) => {
+          message.error(reason.message);
+        });
     }
   }, []);
 
@@ -34,18 +46,20 @@ export default function App<T extends { userState: IUserEntity | null, isAdmin?:
     <ConfigProvider locale={zhCN}>
       <UserContext.Provider value={{ userState, userDispatch }}>
         <UranusSkin />
-        {
-          pageProps.isAdmin ?
-            <AdminContainer>
-              <Component {...pageProps} />
-            </AdminContainer> :
-            <>
-              <Header />
-              <Component {...pageProps} />
-            </>
-        }
+        {pageProps.isAdmin ? (
+          <AdminContainer>
+            <Component {...pageProps} />
+          </AdminContainer>
+        ) : (
+          <>
+            <Header />
+            <Component {...pageProps} />
+          </>
+        )}
         <UranusFooter />
       </UserContext.Provider>
     </ConfigProvider>
   );
 }
+
+export const runtime = 'edge';

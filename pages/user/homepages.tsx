@@ -10,18 +10,18 @@ const UserHomePages = () => {
   return (
     <>
       <Content
-        left={(
+        left={
           <>
             <UranusAvatar />
             <Advertisement01 />
           </>
-        )}
-        right={(
+        }
+        right={
           <>
             <UranusMotto />
             <Advertisement02 />
           </>
-        )}
+        }
       >
         <CUserHomePages />
       </Content>
@@ -31,10 +31,12 @@ const UserHomePages = () => {
 
 export default UserHomePages;
 
+export const runtime = 'edge';
+
 export async function getStaticProps() {
   return {
     props: {
       userState: null,
-    }
+    },
   };
 }

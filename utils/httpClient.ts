@@ -57,6 +57,8 @@ const parseQueryString = (params: {
   return queryString ? '?' + queryString : '';
 };
 
+export const runtime = 'edge';
+
 // user
 export const userStatus = (
   SSRBaseURL: string | null,

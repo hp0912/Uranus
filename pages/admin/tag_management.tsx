@@ -6,7 +6,19 @@ import {
   PauseCircleOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
-import { Breadcrumb, Button, Col, Input, InputNumber, message, Modal, Popconfirm, Row, Table, Tooltip } from 'antd';
+import {
+  Breadcrumb,
+  Button,
+  Col,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Popconfirm,
+  Row,
+  Table,
+  Tooltip,
+} from 'antd';
 import { ColumnsType } from 'antd/lib/table/interface';
 import React, { FC, useCallback, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
@@ -32,7 +44,6 @@ interface ITagEditState extends ITagEntity {
 }
 
 const TagManagement: FC = () => {
-
   const [adminTagState, setAdminTagState] = useSetState<IAdminArtListState>({
     data: [],
     currentOPId: null,
@@ -59,9 +70,7 @@ const TagManagement: FC = () => {
       align: 'left',
       ellipsis: true,
       render: (text: string) => {
-        return (
-          <span>{text}</span>
-        );
+        return <span>{text}</span>;
       },
     },
     {
@@ -70,7 +79,9 @@ const TagManagement: FC = () => {
       width: '20%',
       align: 'center',
       render: (color: string) => {
-        return <div style={{ width: '100%', height: 25, backgroundColor: color }} />;
+        return (
+          <div style={{ width: '100%', height: 25, backgroundColor: color }} />
+        );
       },
     },
     {
@@ -91,26 +102,36 @@ const TagManagement: FC = () => {
       render: (text, record) => {
         return (
           <>
-            <EditOutlined className="uranus-margin-right-8" onClick={() => { onTagEditClick(record); }} />
-            {
-              adminTagState.deleting && adminTagState.currentOPId === record.id ?
-                <LoadingOutlined /> :
-                adminTagState.deleting ?
-                  <PauseCircleOutlined /> :
-                  (
-                    <Popconfirm
-                      title="确定要删除该标签吗？"
-                      okText="确认"
-                      cancelText="取消"
-                      icon={<QuestionCircleOutlined className={componentStyles.uranus_delete_icon} />}
-                      onConfirm={() => { onTagDelClick(record.id); }}
-                    >
-                      <Tooltip title="删除">
-                        <DeleteOutlined />
-                      </Tooltip>
-                    </Popconfirm>
-                  )
-            }
+            <EditOutlined
+              className="uranus-margin-right-8"
+              onClick={() => {
+                onTagEditClick(record);
+              }}
+            />
+            {adminTagState.deleting &&
+            adminTagState.currentOPId === record.id ? (
+              <LoadingOutlined />
+            ) : adminTagState.deleting ? (
+              <PauseCircleOutlined />
+            ) : (
+              <Popconfirm
+                title="确定要删除该标签吗？"
+                okText="确认"
+                cancelText="取消"
+                icon={
+                  <QuestionCircleOutlined
+                    className={componentStyles.uranus_delete_icon}
+                  />
+                }
+                onConfirm={() => {
+                  onTagDelClick(record.id);
+                }}
+              >
+                <Tooltip title="删除">
+                  <DeleteOutlined />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </>
         );
       },
@@ -125,7 +146,9 @@ const TagManagement: FC = () => {
 
       setAdminTagState({ loading: false, data: result.data.data });
     } catch (ex) {
-      message.error(ex.message);
+      if (ex instanceof Error) {
+        message.error(ex.message);
+      }
       setAdminTagState({ loading: false });
     }
     // eslint-disable-next-line
@@ -160,20 +183,29 @@ const TagManagement: FC = () => {
       setAdminTagState({ deleting: true, currentOPId: id });
 
       const result = await tagDelete({ id: id as string });
-      setAdminTagState({ data: result.data.data, deleting: false, currentOPId: null });
+      setAdminTagState({
+        data: result.data.data,
+        deleting: false,
+        currentOPId: null,
+      });
 
       message.success('删除成功');
     } catch (ex) {
-      message.error('删除失败：' + ex.message);
+      if (ex instanceof Error) {
+        message.error('删除失败：' + ex.message);
+      }
       setAdminTagState({ deleting: false, currentOPId: null });
     }
     // eslint-disable-next-line
   }, []);
 
-  const onTagNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setTagEditState({ name: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onTagNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setTagEditState({ name: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onChangeComplete = useCallback((color) => {
     setTagEditState({ color: color.hex });
@@ -186,7 +218,11 @@ const TagManagement: FC = () => {
   }, []);
 
   const onOk = useCallback(async () => {
-    if (tagEditState.name === undefined || tagEditState.name === undefined || tagEditState.name === '') {
+    if (
+      tagEditState.name === undefined ||
+      tagEditState.name === undefined ||
+      tagEditState.name === ''
+    ) {
       throw new Error('标签名不合法');
     }
 
@@ -198,7 +234,10 @@ const TagManagement: FC = () => {
       throw new Error('标签排序不合法');
     }
 
-    if (!tagEditState.color || !tagEditState.color.match(/^#[0-9a-fA-F]{3,6}$/)) {
+    if (
+      !tagEditState.color ||
+      !tagEditState.color.match(/^#[0-9a-fA-F]{3,6}$/)
+    ) {
       throw new Error('标签颜色不合法');
     }
 
@@ -212,7 +251,9 @@ const TagManagement: FC = () => {
 
       message.success('保存成功');
     } catch (ex) {
-      message.error('保存失败：' + ex.message);
+      if (ex instanceof Error) {
+        message.error('保存失败：' + ex.message);
+      }
       setTagEditState({ loading: false });
     }
     // eslint-disable-next-line
@@ -269,17 +310,13 @@ const TagManagement: FC = () => {
       >
         <div>
           <Row className="uranus-row">
-            <Col span={5}>
-              标签名：
-            </Col>
+            <Col span={5}>标签名：</Col>
             <Col span={19}>
               <Input value={tagEditState.name} onChange={onTagNameChange} />
             </Col>
           </Row>
           <Row className="uranus-row">
-            <Col span={5}>
-              标签颜色：
-            </Col>
+            <Col span={5}>标签颜色：</Col>
             <Col span={19}>
               <SketchPicker
                 color={tagEditState.color}
@@ -288,11 +325,13 @@ const TagManagement: FC = () => {
             </Col>
           </Row>
           <Row>
-            <Col span={5}>
-              标签排序：
-            </Col>
+            <Col span={5}>标签排序：</Col>
             <Col span={19}>
-              <InputNumber value={tagEditState.index} precision={0} onChange={onTagIndexChange} />
+              <InputNumber
+                value={tagEditState.index}
+                precision={0}
+                onChange={onTagIndexChange}
+              />
             </Col>
           </Row>
         </div>
@@ -303,11 +342,13 @@ const TagManagement: FC = () => {
 
 export default TagManagement;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       userState: null,
       isAdmin: true,
-    }
+    },
   };
 };

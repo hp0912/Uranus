@@ -1,12 +1,29 @@
-import { DeleteOutlined, LoadingOutlined, PauseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Breadcrumb, Col, Input, message, Popconfirm, Row, Table, Tooltip } from 'antd';
+import {
+  DeleteOutlined,
+  LoadingOutlined,
+  PauseCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
+import {
+  Breadcrumb,
+  Col,
+  Input,
+  message,
+  Popconfirm,
+  Row,
+  Table,
+  Tooltip,
+} from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/lib/table/interface';
 import { GetServerSideProps } from 'next';
 import React, { FC, useCallback, useEffect } from 'react';
 import { IMessageEntity } from '../../types';
 import { formatDate } from '../../utils';
 import { useSetState } from '../../utils/commonHooks';
-import { messageDeleteForAdmin, messageListForAdmin } from '../../utils/httpClient';
+import {
+  messageDeleteForAdmin,
+  messageListForAdmin,
+} from '../../utils/httpClient';
 
 // 样式
 import componentStyles from '../../components/components.module.css';
@@ -83,92 +100,119 @@ const MessageManagement: FC = () => {
       render: (e, item) => {
         return (
           <>
-            {
-              messagesState.deleting && messagesState.currentOPId === item.id ?
-                <LoadingOutlined /> :
-                messagesState.deleting ?
-                  <PauseCircleOutlined /> :
-                  (
-                    <Popconfirm
-                      title="确定要删除该评论吗？"
-                      okText="确认"
-                      cancelText="取消"
-                      icon={<QuestionCircleOutlined className={componentStyles.uranus_delete_icon} />}
-                      onConfirm={() => { onMessageDelete(item.id!); }}
-                    >
-                      <Tooltip title="删除">
-                        <DeleteOutlined />
-                      </Tooltip>
-                    </Popconfirm>
-                  )
-            }
+            {messagesState.deleting && messagesState.currentOPId === item.id ? (
+              <LoadingOutlined />
+            ) : messagesState.deleting ? (
+              <PauseCircleOutlined />
+            ) : (
+              <Popconfirm
+                title="确定要删除该评论吗？"
+                okText="确认"
+                cancelText="取消"
+                icon={
+                  <QuestionCircleOutlined
+                    className={componentStyles.uranus_delete_icon}
+                  />
+                }
+                onConfirm={() => {
+                  onMessageDelete(item.id!);
+                }}
+              >
+                <Tooltip title="删除">
+                  <DeleteOutlined />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </>
         );
       },
     },
   ];
 
-  const onMessageDelete = useCallback(async (messageId: string) => {
-    try {
-      setMessagesState({ deleting: true, currentOPId: messageId });
-      const { pagination: { current, pageSize }, searchValue } = messagesState;
+  const onMessageDelete = useCallback(
+    async (messageId: string) => {
+      try {
+        setMessagesState({ deleting: true, currentOPId: messageId });
+        const {
+          pagination: { current, pageSize },
+          searchValue,
+        } = messagesState;
 
-      await messageDeleteForAdmin({ messageId });
-      const messagesResult = await messageListForAdmin({ pagination: { current, pageSize }, searchValue });
-      const { messages, total } = messagesResult.data.data;
+        await messageDeleteForAdmin({ messageId });
+        const messagesResult = await messageListForAdmin({
+          pagination: { current, pageSize },
+          searchValue,
+        });
+        const { messages, total } = messagesResult.data.data;
 
-      setMessagesState({
-        deleting: false,
-        currentOPId: null,
-        data: messages,
-        pagination: {
-          ...messagesState.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setMessagesState({ deleting: false, currentOPId: null });
-    }
-  }, [messagesState, setMessagesState]);
-
-  const getMessages = useCallback(async (params?: IAdminMessagesParams) => {
-    try {
-      if (!params) {
-        params = { pagination: { current: 1, pageSize: 15 }, searchValue: messagesState.searchValue };
+        setMessagesState({
+          deleting: false,
+          currentOPId: null,
+          data: messages,
+          pagination: {
+            ...messagesState.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setMessagesState({ deleting: false, currentOPId: null });
       }
+    },
+    [messagesState, setMessagesState]
+  );
 
-      setMessagesState({ loading: true });
+  const getMessages = useCallback(
+    async (params?: IAdminMessagesParams) => {
+      try {
+        if (!params) {
+          params = {
+            pagination: { current: 1, pageSize: 15 },
+            searchValue: messagesState.searchValue,
+          };
+        }
 
-      const messagesResult = await messageListForAdmin(params);
-      const { messages, total } = messagesResult.data.data;
+        setMessagesState({ loading: true });
 
-      setMessagesState({
-        loading: false,
-        data: messages,
-        pagination: {
-          ...messagesState.pagination,
-          ...params.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setMessagesState({ loading: false });
-    }
-  }, [messagesState, setMessagesState]);
+        const messagesResult = await messageListForAdmin(params);
+        const { messages, total } = messagesResult.data.data;
 
-  const onTableChange = useCallback((
-    pagination: TablePaginationConfig,
-  ) => {
-    const params = { pagination, searchValue: messagesState.searchValue };
-    getMessages(params);
-  }, [messagesState.searchValue, getMessages]);
+        setMessagesState({
+          loading: false,
+          data: messages,
+          pagination: {
+            ...messagesState.pagination,
+            ...params.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setMessagesState({ loading: false });
+      }
+    },
+    [messagesState, setMessagesState]
+  );
 
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setMessagesState({ searchValue: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onTableChange = useCallback(
+    (pagination: TablePaginationConfig) => {
+      const params = { pagination, searchValue: messagesState.searchValue };
+      getMessages(params);
+    },
+    [messagesState.searchValue, getMessages]
+  );
+
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setMessagesState({ searchValue: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSearch = useCallback(() => {
     if (messagesState.loading) {
@@ -213,11 +257,13 @@ const MessageManagement: FC = () => {
 
 export default MessageManagement;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       userState: null,
       isAdmin: true,
-    }
+    },
   };
 };

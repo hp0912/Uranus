@@ -24,21 +24,24 @@ const Watermelon = () => (
       <title>DIY合成大西瓜</title>
       <meta name="keywords" content="DIY合成大西瓜" />
       <meta name="description" property="og:description" content="小游戏" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+      />
     </Head>
     <Content
-      left={(
+      left={
         <>
           <UranusAvatar />
           <Advertisement01 />
         </>
-      )}
-      right={(
+      }
+      right={
         <>
           <UranusMotto />
           <Advertisement02 />
         </>
-      )}
+      }
     >
       <WatermelonWithNoSSR />
     </Content>
@@ -46,3 +49,5 @@ const Watermelon = () => (
 );
 
 export default Watermelon;
+
+export const runtime = 'edge';

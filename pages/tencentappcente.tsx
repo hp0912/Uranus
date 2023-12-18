@@ -160,6 +160,8 @@ const WechatScan = (props: { gameList: WechatGameList }) => {
 
 export default WechatScan;
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async () => {
   const resp = await wechatGameList();
   return {

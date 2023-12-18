@@ -197,6 +197,8 @@ export default function ArticleDetailPage(props: IArticleProps) {
   );
 }
 
+export const runtime = 'edge';
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const {
     req: { headers },
