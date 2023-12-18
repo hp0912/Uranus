@@ -84,7 +84,7 @@ export default function ArticleDetailPage(props: IArticleProps) {
       .use(MdHeadingAnchor, { tocify });
 
     _md.renderer.rules.emoji = (token, idx) => {
-      return twemoji.parse(token[idx].content);
+      return twemoji.parse(token[idx].content) as unknown as string;
     };
 
     return _md;

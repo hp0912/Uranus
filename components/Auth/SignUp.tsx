@@ -40,7 +40,10 @@ export const SignUp: FC<ISignUpProps> = (props) => {
 
   const [smsText, setSmsText] = useState('获取验证码');
   const [smsDisabled, setSmsDisabled] = useState(false);
-  const [loadingState, setLoadingState] = useSetState<ILoadingState>({ loading: false, smsLoading: false });
+  const [loadingState, setLoadingState] = useSetState<ILoadingState>({
+    loading: false,
+    smsLoading: false,
+  });
   const [signUpState, setSignUpState] = useSetState<ISignUpState>({
     username: '',
     password: '',
@@ -66,25 +69,37 @@ export const SignUp: FC<ISignUpProps> = (props) => {
     // eslint-disable-next-line
   }, []);
 
-  const onUserNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSignUpState({ username: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onUserNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSignUpState({ username: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
-  const onPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSignUpState({ password: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onPasswordChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSignUpState({ password: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
-  const onConfirmPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSignUpState({ confirmPassword: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onConfirmPasswordChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSignUpState({ confirmPassword: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
-  const onSmsChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSignUpState({ sms: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onSmsChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSignUpState({ sms: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSendSmsClick = useCallback(async () => {
     try {
@@ -100,7 +115,10 @@ export const SignUp: FC<ISignUpProps> = (props) => {
         return;
       }
 
-      await sendSms({ phoneNumber: signUpState.username, token: dxTokenRef.current });
+      await sendSms({
+        phoneNumber: signUpState.username,
+        token: dxTokenRef.current,
+      });
 
       message.success('发送验证码成功');
 
@@ -122,7 +140,7 @@ export const SignUp: FC<ISignUpProps> = (props) => {
       dxInstanceRef.current?.reload();
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: ex instanceof Error ? ex.message : '未知错误',
       });
     } finally {
       setLoadingState({ smsLoading: false });
@@ -161,7 +179,7 @@ export const SignUp: FC<ISignUpProps> = (props) => {
     } catch (ex) {
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: ex instanceof Error ? ex.message : '未知错误',
       });
     } finally {
       setLoadingState({ loading: false });
@@ -206,13 +224,24 @@ export const SignUp: FC<ISignUpProps> = (props) => {
         placeholder="请输入验证码"
         value={signUpState.sms}
         onChange={onSmsChange}
-        addonAfter={(
-          <Button type="link" loading={loadingState.smsLoading} disabled={smsDisabled} onClick={onSendSmsClick}>
+        addonAfter={
+          <Button
+            type="link"
+            loading={loadingState.smsLoading}
+            disabled={smsDisabled}
+            onClick={onSendSmsClick}
+          >
             {smsText}
           </Button>
-        )}
+        }
       />
-      <Button type="primary" size="large" loading={loadingState.loading} block onClick={onSignUpClick}>
+      <Button
+        type="primary"
+        size="large"
+        loading={loadingState.loading}
+        block
+        onClick={onSignUpClick}
+      >
         注册
       </Button>
       <Button type="link" size="large" block onClick={switchMode}>

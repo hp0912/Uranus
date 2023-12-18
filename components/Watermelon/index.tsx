@@ -1,11 +1,38 @@
-import { Alert, Button, Col, Input, message, Modal, Row, Select, Table, Tooltip } from 'antd';
+import {
+  Alert,
+  Button,
+  Col,
+  Input,
+  message,
+  Modal,
+  Row,
+  Select,
+  Table,
+  Tooltip,
+} from 'antd';
 import { ColumnsType } from 'antd/lib/table';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { UserContext } from '../../store/user';
 import { GoodsType, IOrderEntity, PayCode } from '../../types';
-import { generateOrder, watermelonPathAdd, watermelonPathGet, watermelonUploadTokenGet } from '../../utils/httpClient';
+import {
+  generateOrder,
+  watermelonPathAdd,
+  watermelonPathGet,
+  watermelonUploadTokenGet,
+} from '../../utils/httpClient';
 import { WatermelonUpload } from './WatermelonUpload';
-import { SmileOutlined, PayCircleOutlined, LoadingOutlined, ShareAltOutlined } from '@ant-design/icons';
+import {
+  SmileOutlined,
+  PayCircleOutlined,
+  LoadingOutlined,
+  ShareAltOutlined,
+} from '@ant-design/icons';
 import { Pay } from '../Pay';
 import OSS from 'ali-oss';
 
@@ -141,7 +168,7 @@ const WatermelonInfo = [
 interface IWatermelonState {
   loading: boolean;
   visible?: boolean;
-  pathList: Array<{ id: string, path: string, code: PayCode }>;
+  pathList: Array<{ id: string; path: string; code: PayCode }>;
   selectedPath?: string;
   inputPath?: string;
 }
@@ -149,7 +176,10 @@ interface IWatermelonState {
 const Watermelon = () => {
   const userContext = useContext(UserContext);
 
-  const [payState, setPayState] = useState<{ visible: boolean, order: IOrderEntity | null }>({ visible: false, order: null });
+  const [payState, setPayState] = useState<{
+    visible: boolean;
+    order: IOrderEntity | null;
+  }>({ visible: false, order: null });
   const [orderLoading, setOrderLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [watermelonState, setWatermelonState] = useState<IWatermelonState>({
@@ -162,12 +192,22 @@ const Watermelon = () => {
 
   useEffect(() => {
     if (userContext.userState) {
-      watermelonPathGet().then(res => {
-        setWatermelonState({ loading: false, pathList: res.data.data, selectedPath: undefined });
-      }).catch(reason => {
-        message.error(reason.message);
-        setWatermelonState({ loading: false, pathList: [], selectedPath: undefined });
-      });
+      watermelonPathGet()
+        .then((res) => {
+          setWatermelonState({
+            loading: false,
+            pathList: res.data.data,
+            selectedPath: undefined,
+          });
+        })
+        .catch((reason) => {
+          message.error(reason.message);
+          setWatermelonState({
+            loading: false,
+            pathList: [],
+            selectedPath: undefined,
+          });
+        });
     } else {
       Modal.warn({ title: '未登录', content: '登录后才能DIY合成大西瓜' });
     }
@@ -215,10 +255,17 @@ const Watermelon = () => {
 
       const res = await watermelonPathAdd({ path: watermelonState.inputPath! });
       setWatermelonState((prev) => {
-        return Object.assign({}, prev, { visible: false, inputPath: '', loading: false, pathList: res.data.data });
+        return Object.assign({}, prev, {
+          visible: false,
+          inputPath: '',
+          loading: false,
+          pathList: res.data.data,
+        });
       });
     } catch (ex) {
-      message.error(ex.message);
+      if (ex instanceof Error) {
+        message.error(ex.message);
+      }
       setWatermelonState((prev) => {
         return Object.assign({}, prev, { loading: false });
       });
@@ -231,18 +278,26 @@ const Watermelon = () => {
     });
   }, []);
 
-  const onPathChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((ev) => {
-    setWatermelonState((prev) => {
-      return Object.assign({}, prev, { inputPath: ev.target.value });
-    });
-  }, []);
+  const onPathChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
+    (ev) => {
+      setWatermelonState((prev) => {
+        return Object.assign({}, prev, { inputPath: ev.target.value });
+      });
+    },
+    []
+  );
 
-  const onImgChange = useCallback((data: { dir: string, filename: string, blob: Blob | null }) => {
-    if (!watermelonState.selectedPath) {
-      return;
-    }
-    uploadFileMap.current[`${watermelonState.selectedPath}/res/raw-assets/${data.dir}/${data.filename}`] = data.blob;
-  }, [watermelonState.selectedPath]);
+  const onImgChange = useCallback(
+    (data: { dir: string; filename: string; blob: Blob | null }) => {
+      if (!watermelonState.selectedPath) {
+        return;
+      }
+      uploadFileMap.current[
+        `${watermelonState.selectedPath}/res/raw-assets/${data.dir}/${data.filename}`
+      ] = data.blob;
+    },
+    [watermelonState.selectedPath]
+  );
 
   const onUploadClick = useCallback(async () => {
     if (!watermelonState.selectedPath) {
@@ -251,9 +306,12 @@ const Watermelon = () => {
 
     try {
       setUploading(true);
-      const tokenResult = await watermelonUploadTokenGet({ path: watermelonState.selectedPath! });
+      const tokenResult = await watermelonUploadTokenGet({
+        path: watermelonState.selectedPath!,
+      });
 
-      const { AccessKeyId, AccessKeySecret, SecurityToken } = tokenResult.data.data;
+      const { AccessKeyId, AccessKeySecret, SecurityToken } =
+        tokenResult.data.data;
       const client = new OSS({
         region: 'oss-cn-shenzhen',
         accessKeyId: AccessKeyId,
@@ -263,24 +321,29 @@ const Watermelon = () => {
         secure: true,
       });
 
-      await Promise.all(Object.entries(uploadFileMap.current).map(([filename, blob]) => {
-        if (blob) {
-          const reader = new FileReader();
-          reader.readAsArrayBuffer(blob);
-          return new Promise((resolve) => {
-            reader.onload = function (event) {
-              if (event.target) {
-                const buffer = new (OSS as any).Buffer(event.target.result);
-                return resolve(client.put(filename, buffer));
-              }
-            }
-          });
-        }
-      }));
+      await Promise.all(
+        Object.entries(uploadFileMap.current).map(([filename, blob]) => {
+          if (blob) {
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(blob);
+            return new Promise((resolve) => {
+              reader.onload = function (event) {
+                if (event.target) {
+                  const buffer = new (OSS as any).Buffer(event.target.result);
+                  return resolve(client.put(filename, buffer));
+                }
+              };
+            });
+          }
+        })
+      );
 
       message.success('上传成功');
     } catch (ex) {
-      Modal.error({ title: '上传失败', content: ex.message });
+      Modal.error({
+        title: '上传失败',
+        content: ex instanceof Error ? ex.message : '未知错误',
+      });
     } finally {
       setUploading(false);
     }
@@ -290,14 +353,17 @@ const Watermelon = () => {
     try {
       setOrderLoading(true);
 
-      const orderResult = await generateOrder({ goodsType: GoodsType.watermelon, goodsId: pathId });
+      const orderResult = await generateOrder({
+        goodsType: GoodsType.watermelon,
+        goodsId: pathId,
+      });
 
       setOrderLoading(false);
       setPayState({ visible: true, order: orderResult.data.data });
     } catch (ex) {
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: ex instanceof Error ? ex.message : '未知错误',
       });
       setOrderLoading(false);
     }
@@ -309,25 +375,38 @@ const Watermelon = () => {
 
   const onPaySuccess = useCallback(async () => {
     setPayState({ visible: false, order: null });
-    watermelonPathGet().then(res => {
-      setWatermelonState(prev => {
-        const newState = Object.assign({}, prev);
-        newState.pathList = res.data.data;
-        return newState;
+    watermelonPathGet()
+      .then((res) => {
+        setWatermelonState((prev) => {
+          const newState = Object.assign({}, prev);
+          newState.pathList = res.data.data;
+          return newState;
+        });
+      })
+      .catch((reason) => {
+        message.error(reason.message);
       });
-    }).catch(reason => {
-      message.error(reason.message);
-    });
   }, []);
 
-  const columns: ColumnsType<{ id: string, path: string, code: PayCode }> = [
+  const columns: ColumnsType<{ id: string; path: string; code: PayCode }> = [
     {
       title: '游戏路径',
       dataIndex: 'path',
       key: 'path',
       align: 'left',
       render: (path: string) => {
-        return <span><ShareAltOutlined style={{ marginRight: 8, color: '#1890ff' }} /><a href={`https://m.houhoukang.com/${path}`} target="_blank" rel="noreferrer">{path}</a></span>
+        return (
+          <span>
+            <ShareAltOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+            <a
+              href={`https://m.houhoukang.com/${path}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {path}
+            </a>
+          </span>
+        );
       },
     },
     {
@@ -337,11 +416,11 @@ const Watermelon = () => {
       align: 'center',
       render: (code: PayCode) => {
         if (code === PayCode.init) {
-          return <span style={{ color: 'yellowgreen' }}>待支付</span>
+          return <span style={{ color: 'yellowgreen' }}>待支付</span>;
         } else if (code === PayCode.success) {
-          return <span style={{ color: 'green' }}>支付成功</span>
+          return <span style={{ color: 'green' }}>支付成功</span>;
         }
-        return <span style={{ color: 'red' }}>支付失败</span>
+        return <span style={{ color: 'red' }}>支付失败</span>;
       },
     },
     {
@@ -402,19 +481,30 @@ const Watermelon = () => {
       />
       <Row className="uranus-row">
         <Col span={20} style={{ paddingLeft: 8 }}>
-          <Select value={watermelonState.selectedPath} placeholder="选择图片上传路径" className="uranus-row-select" onChange={onSelectedPathChange}>
-            {
-              watermelonState.pathList.filter(item => {
+          <Select
+            value={watermelonState.selectedPath}
+            placeholder="选择图片上传路径"
+            className="uranus-row-select"
+            onChange={onSelectedPathChange}
+          >
+            {watermelonState.pathList
+              .filter((item) => {
                 return item.code === PayCode.success;
-              }).map(p => {
-                return (
-                  <Select.Option key={p.path} value={p.path}>{p.path}</Select.Option>
-                );
               })
-            }
+              .map((p) => {
+                return (
+                  <Select.Option key={p.path} value={p.path}>
+                    {p.path}
+                  </Select.Option>
+                );
+              })}
           </Select>
         </Col>
-        <Col span={4} className="save" style={{ textAlign: 'right', padding: '0 8px 0 0' }}>
+        <Col
+          span={4}
+          className="save"
+          style={{ textAlign: 'right', padding: '0 8px 0 0' }}
+        >
           <Button
             type="primary"
             style={{ width: '95%' }}
@@ -426,30 +516,30 @@ const Watermelon = () => {
           </Button>
         </Col>
       </Row>
-      {
-        !!watermelonState.selectedPath ?
-          (
-            <div style={{
-              margin: 5,
-              padding: 15,
-              border: '1px solid gray',
-              borderRadius: '4px',
-              display: 'flex',
-              justifyContent: 'space-around',
-              flexDirection: 'row',
-              flexWrap: 'wrap'
-            }}>
-              {
-                WatermelonInfo.map(wm => {
-                  return (
-                    <WatermelonUpload key={wm.filename} {...wm} onChange={onImgChange} />
-                  );
-                })
-              }
-            </div>
-          ) :
-          null
-      }
+      {!!watermelonState.selectedPath ? (
+        <div
+          style={{
+            margin: 5,
+            padding: 15,
+            border: '1px solid gray',
+            borderRadius: '4px',
+            display: 'flex',
+            justifyContent: 'space-around',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+          }}
+        >
+          {WatermelonInfo.map((wm) => {
+            return (
+              <WatermelonUpload
+                key={wm.filename}
+                {...wm}
+                onChange={onImgChange}
+              />
+            );
+          })}
+        </div>
+      ) : null}
       <Modal
         title="添加游戏路径"
         visible={watermelonState.visible}
@@ -460,23 +550,22 @@ const Watermelon = () => {
       >
         <Row>
           <Col span={4}>游戏路径</Col>
-          <Col span={20}><Input value={watermelonState.inputPath} onChange={onPathChange} /></Col>
+          <Col span={20}>
+            <Input value={watermelonState.inputPath} onChange={onPathChange} />
+          </Col>
         </Row>
       </Modal>
-      {
-        payState.order &&
-        (
-          <Pay
-            title="购买游戏路径"
-            visible={payState.visible}
-            order={payState.order}
-            onSuccess={onPaySuccess}
-            onCancel={onGenOrderCancle}
-          />
-        )
-      }
+      {payState.order && (
+        <Pay
+          title="购买游戏路径"
+          visible={payState.visible}
+          order={payState.order}
+          onSuccess={onPaySuccess}
+          onCancel={onGenOrderCancle}
+        />
+      )}
     </div>
   );
-}
+};
 
 export default Watermelon;

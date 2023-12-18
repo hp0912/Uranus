@@ -1,9 +1,26 @@
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { Breadcrumb, Button, Col, Input, message, Modal, Result, Row, Upload } from 'antd';
-import ImgCrop from 'antd-img-crop';
+import {
+  Breadcrumb,
+  Button,
+  Col,
+  Input,
+  message,
+  Modal,
+  Result,
+  Row,
+  Upload,
+} from 'antd';
+import ImgCrop, { ImgCropProps } from 'antd-img-crop';
 import { UploadChangeParam } from 'antd/lib/upload';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
-import React, { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { SETUSER, UserContext } from '../../store/user';
 import { ISTSAuthForFormResult, IUserEntity } from '../../types';
 import { AliyunOSSDir, AliyunOSSHost } from '../../utils/constant';
@@ -13,6 +30,10 @@ import { UranusPrompt } from '../UranusPrompt';
 // 样式
 import 'antd/lib/slider/style/index.css';
 import styles from './user.module.css';
+
+const ImgCropComponent = ImgCrop as React.FC<
+  ImgCropProps & { children?: React.ReactNode }
+>;
 
 export const CUserSettings: FC = () => {
   const userContext = useContext(UserContext);
@@ -43,7 +64,7 @@ export const CUserSettings: FC = () => {
     let src = file.url;
 
     if (!src) {
-      src = await new Promise(resolve => {
+      src = await new Promise((resolve) => {
         const reader = new FileReader();
 
         if (file.originFileObj) {
@@ -69,106 +90,132 @@ export const CUserSettings: FC = () => {
     }
   }, []);
 
-  const beforeUpload = useCallback(async (file: RcFile) => {
-    if (!userContext.userState) {
-      return Promise.reject('请先登录');
-    }
+  const beforeUpload = useCallback(
+    async (file: RcFile) => {
+      if (!userContext.userState) {
+        return Promise.reject('请先登录');
+      }
 
-    const validImage = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png' || file.type === 'image/webp';
+      const validImage =
+        file.type === 'image/jpeg' ||
+        file.type === 'image/jpg' ||
+        file.type === 'image/png' ||
+        file.type === 'image/webp';
 
-    if (!validImage) {
-      Modal.error({
-        title: '错误',
-        content: '非法的图片格式',
-      });
-    }
+      if (!validImage) {
+        Modal.error({
+          title: '错误',
+          content: '非法的图片格式',
+        });
+      }
 
-    const limitSize = file.size / 1024 / 1024 < 2.5;
+      const limitSize = file.size / 1024 / 1024 < 2.5;
 
-    if (!limitSize) {
-      Modal.error({
-        title: '错误',
-        content: '图片大小不得超过2.5M',
-      });
-    }
+      if (!limitSize) {
+        Modal.error({
+          title: '错误',
+          content: '图片大小不得超过2.5M',
+        });
+      }
 
-    try {
-      const suffix = file.name.slice(file.name.lastIndexOf('.'));
-      const filename = `avatar_${new Date().getTime()}${suffix}`;
-      const tokenResult = await stsAuthForForm(filename);
-      const sts = tokenResult.data.data as ISTSAuthForFormResult;
-      (file as any).aliyunOSSFilename = `${AliyunOSSDir}/${userContext.userState.id}/${filename}`;
+      try {
+        const suffix = file.name.slice(file.name.lastIndexOf('.'));
+        const filename = `avatar_${new Date().getTime()}${suffix}`;
+        const tokenResult = await stsAuthForForm(filename);
+        const sts = tokenResult.data.data as ISTSAuthForFormResult;
+        (
+          file as any
+        ).aliyunOSSFilename = `${AliyunOSSDir}/${userContext.userState.id}/${filename}`;
 
-      stsAuthParams.current = sts;
-    } catch (ex) {
-      Modal.error({
-        title: '错误',
-        content: ex.message || ex,
-      });
-      return Promise.reject('获取sts权限失败');
-    }
+        stsAuthParams.current = sts;
+      } catch (ex) {
+        Modal.error({
+          title: '错误',
+          content: ex instanceof Error ? ex.message : '未知错误',
+        });
+        return Promise.reject('获取sts权限失败');
+      }
 
-    if (validImage && limitSize) {
-      return Promise.resolve(file);
-    } else {
-      return Promise.reject(new Error('图片不合法'));
-    }
-  }, [userContext.userState]);
+      if (validImage && limitSize) {
+        return Promise.resolve(file);
+      } else {
+        return Promise.reject(new Error('图片不合法'));
+      }
+    },
+    [userContext.userState]
+  );
 
-  const onChange = useCallback((info: UploadChangeParam<UploadFile<any>>) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
+  const onChange = useCallback(
+    (info: UploadChangeParam<UploadFile<any>>) => {
+      if (info.file.status === 'uploading') {
+        setLoading(true);
+        return;
+      }
 
-    if (info.file.status === 'done') {
-      setLoading(false);
-      unsavedChanges.current = true;
+      if (info.file.status === 'done') {
+        setLoading(false);
+        unsavedChanges.current = true;
 
+        const newUserProfile = Object.assign({}, userProfile);
+        newUserProfile.avatar = `${AliyunOSSHost}/${
+          (info.file as any).aliyunOSSFilename
+        }`;
+
+        setUserProfile(newUserProfile);
+      }
+    },
+    [userProfile]
+  );
+
+  const onNicknameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       const newUserProfile = Object.assign({}, userProfile);
-      newUserProfile.avatar = `${AliyunOSSHost}/${(info.file as any).aliyunOSSFilename}`;
-
+      newUserProfile.nickname = event.target.value;
+      unsavedChanges.current = true;
       setUserProfile(newUserProfile);
-    }
-  }, [userProfile]);
+    },
+    [userProfile]
+  );
 
-  const onNicknameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const newUserProfile = Object.assign({}, userProfile);
-    newUserProfile.nickname = event.target.value;
-    unsavedChanges.current = true;
-    setUserProfile(newUserProfile);
-  }, [userProfile]);
+  const onSignatureChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newUserProfile = Object.assign({}, userProfile);
+      newUserProfile.signature = event.target.value;
+      unsavedChanges.current = true;
+      setUserProfile(newUserProfile);
+    },
+    [userProfile]
+  );
 
-  const onSignatureChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const newUserProfile = Object.assign({}, userProfile);
-    newUserProfile.signature = event.target.value;
-    unsavedChanges.current = true;
-    setUserProfile(newUserProfile);
-  }, [userProfile]);
+  const onPersonalProfileChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newUserProfile = Object.assign({}, userProfile);
+      newUserProfile.personalProfile = event.target.value;
+      unsavedChanges.current = true;
+      setUserProfile(newUserProfile);
+    },
+    [userProfile]
+  );
 
-  const onPersonalProfileChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newUserProfile = Object.assign({}, userProfile);
-    newUserProfile.personalProfile = event.target.value;
-    unsavedChanges.current = true;
-    setUserProfile(newUserProfile);
-  }, [userProfile]);
+  const getExtraData = useCallback(
+    (file) => {
+      if (!userContext.userState) {
+        return Promise.reject('请先登录');
+      }
 
-  const getExtraData = useCallback((file) => {
-    if (!userContext.userState) {
-      return Promise.reject('请先登录');
-    }
+      if (!stsAuthParams.current.OSSAccessKeyId) {
+        throw new Error('图片上传授权失败，请刷新页面后重试');
+      }
 
-    if (!stsAuthParams.current.OSSAccessKeyId) {
-      throw new Error('图片上传授权失败，请刷新页面后重试');
-    }
-
-    return {
-      key: (file as any).aliyunOSSFilename,
-      OSSAccessKeyId: stsAuthParams.current.OSSAccessKeyId,
-      policy: stsAuthParams.current.policy,
-      Signature: stsAuthParams.current.Signature,
-    };
-  }, [userContext.userState]);
+      return {
+        key: (file as any).aliyunOSSFilename,
+        OSSAccessKeyId: stsAuthParams.current.OSSAccessKeyId,
+        policy: stsAuthParams.current.policy,
+        Signature: stsAuthParams.current.Signature,
+      };
+    },
+    [userContext.userState]
+  );
 
   const onSaveClick = useCallback(async () => {
     try {
@@ -190,7 +237,10 @@ export const CUserSettings: FC = () => {
         throw new Error('用户签名不能大于30个字符');
       }
 
-      if (userProfile?.personalProfile && userProfile.personalProfile.length > 200) {
+      if (
+        userProfile?.personalProfile &&
+        userProfile.personalProfile.length > 200
+      ) {
         throw new Error('用户简介不能大于200个字符');
       }
 
@@ -206,7 +256,7 @@ export const CUserSettings: FC = () => {
     } catch (ex) {
       Modal.error({
         title: '错误',
-        content: '保存失败: ' + ex.message,
+        content: ex instanceof Error ? ex.message : '未知错误',
       });
       setSaving(false);
     }
@@ -229,16 +279,14 @@ export const CUserSettings: FC = () => {
         <Breadcrumb.Item>
           <span>用户中心</span>
         </Breadcrumb.Item>
-        <Breadcrumb.Item>
-          个人设置
-        </Breadcrumb.Item>
+        <Breadcrumb.Item>个人设置</Breadcrumb.Item>
       </Breadcrumb>
       <Row className="uranus-row uranus-row-first" style={{ rowGap: 0 }}>
         <Col span={4} className={styles.settings_label}>
           <b>用户头像</b>
         </Col>
         <Col span={20}>
-          <ImgCrop rotate>
+          <ImgCropComponent rotate>
             <Upload
               name="file"
               listType="picture-card"
@@ -250,18 +298,20 @@ export const CUserSettings: FC = () => {
               onChange={onChange}
               data={getExtraData}
             >
-              {
-                userProfile && userProfile.avatar ?
-                  <img src={userProfile.avatar} alt="avatar" style={{ width: '100%' }} /> :
-                  (
-                    <div>
-                      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-                      <div className="ant-upload-text">Upload</div>
-                    </div>
-                  )
-              }
+              {userProfile && userProfile.avatar ? (
+                <img
+                  src={userProfile.avatar}
+                  alt="avatar"
+                  style={{ width: '100%' }}
+                />
+              ) : (
+                <div>
+                  {loading ? <LoadingOutlined /> : <PlusOutlined />}
+                  <div className="ant-upload-text">Upload</div>
+                </div>
+              )}
             </Upload>
-          </ImgCrop>
+          </ImgCropComponent>
         </Col>
       </Row>
       <Row className="uranus-row" style={{ rowGap: 0 }}>
@@ -271,7 +321,9 @@ export const CUserSettings: FC = () => {
         <Col span={20}>
           <Input
             placeholder="用户昵称，七个字以内"
-            value={userProfile && userProfile.nickname ? userProfile.nickname : ''}
+            value={
+              userProfile && userProfile.nickname ? userProfile.nickname : ''
+            }
             onChange={onNicknameChange}
           />
         </Col>
@@ -283,7 +335,9 @@ export const CUserSettings: FC = () => {
         <Col span={20}>
           <Input
             placeholder="个性签名，三十个字以内"
-            value={userProfile && userProfile.signature ? userProfile.signature : ''}
+            value={
+              userProfile && userProfile.signature ? userProfile.signature : ''
+            }
             onChange={onSignatureChange}
           />
         </Col>
@@ -296,7 +350,11 @@ export const CUserSettings: FC = () => {
           <Input.TextArea
             autoSize={{ minRows: 3, maxRows: 6 }}
             placeholder="个人简介，两百个字以内"
-            value={userProfile && userProfile.personalProfile ? userProfile.personalProfile : ''}
+            value={
+              userProfile && userProfile.personalProfile
+                ? userProfile.personalProfile
+                : ''
+            }
             onChange={onPersonalProfileChange}
           />
         </Col>

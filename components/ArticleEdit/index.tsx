@@ -122,7 +122,7 @@ const ArticleEdit: FC<IArticleEditProps> = (props) => {
       .use(mdcontainer, 'uranus-warning');
 
     _md.renderer.rules.emoji = (token, idx) => {
-      return twemoji.parse(token[idx].content);
+      return twemoji.parse(token[idx].content) as unknown as string;
     };
 
     return _md;

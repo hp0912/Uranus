@@ -12,7 +12,10 @@ interface IMyOrdersParams {
 }
 
 interface IMyOrdersProps {
-  dataSource: (params: { pagination: { current?: number, pageSize?: number }, searchValue?: string }) => AxiosPromise<any>;
+  dataSource: (params: {
+    pagination: { current?: number; pageSize?: number };
+    searchValue?: string;
+  }) => AxiosPromise<any>;
 }
 
 interface IMyOrdersState {
@@ -72,7 +75,7 @@ export const MyOrders: FC<IMyOrdersProps> = (props) => {
       width: '15%',
       align: 'center',
       render: (totalPrice: number) => {
-        return <span>{(totalPrice / 100)} 元</span>;
+        return <span>{totalPrice / 100} 元</span>;
       },
     },
     {
@@ -110,44 +113,56 @@ export const MyOrders: FC<IMyOrdersProps> = (props) => {
     },
   ];
 
-  const geMyOrders = useCallback(async (params?: IMyOrdersParams) => {
-    try {
-      if (!params) {
-        params = { pagination: { current: 1, pageSize: 15 }, searchValue: myOrdersState.searchValue };
+  const geMyOrders = useCallback(
+    async (params?: IMyOrdersParams) => {
+      try {
+        if (!params) {
+          params = {
+            pagination: { current: 1, pageSize: 15 },
+            searchValue: myOrdersState.searchValue,
+          };
+        }
+
+        setMyOrdersState({ loading: true });
+
+        const ordersResult = await props.dataSource(params);
+        const { orders, total } = ordersResult.data.data;
+
+        setMyOrdersState({
+          loading: false,
+          data: orders,
+          pagination: {
+            ...myOrdersState.pagination,
+            ...params.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setMyOrdersState({ loading: false });
       }
+      // eslint-disable-next-line
+    },
+    [myOrdersState]
+  );
 
-      setMyOrdersState({ loading: true });
+  const onTableChange = useCallback(
+    (pagination: TablePaginationConfig) => {
+      const params = { pagination, searchValue: myOrdersState.searchValue };
+      geMyOrders(params);
+    },
+    [myOrdersState.searchValue, geMyOrders]
+  );
 
-      const ordersResult = await props.dataSource(params);
-      const { orders, total } = ordersResult.data.data;
-
-      setMyOrdersState({
-        loading: false,
-        data: orders,
-        pagination: {
-          ...myOrdersState.pagination,
-          ...params.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setMyOrdersState({ loading: false });
-    }
-    // eslint-disable-next-line
-  }, [myOrdersState]);
-
-  const onTableChange = useCallback((
-    pagination: TablePaginationConfig,
-  ) => {
-    const params = { pagination, searchValue: myOrdersState.searchValue };
-    geMyOrders(params);
-  }, [myOrdersState.searchValue, geMyOrders]);
-
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setMyOrdersState({ searchValue: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setMyOrdersState({ searchValue: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSearch = useCallback(() => {
     if (myOrdersState.loading) {

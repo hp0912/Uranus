@@ -34,13 +34,17 @@ export const ResetPassword: FC<IResetPasswordProps> = (props) => {
 
   const [smsText, setSmsText] = useState('获取验证码');
   const [smsDisabled, setSmsDisabled] = useState(false);
-  const [loadingState, setLoadingState] = useSetState<ILoadingState>({ loading: false, smsLoading: false });
-  const [resetPasswordState, setResetPasswordState] = useSetState<IResetPasswordState>({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    sms: '',
+  const [loadingState, setLoadingState] = useSetState<ILoadingState>({
+    loading: false,
+    smsLoading: false,
   });
+  const [resetPasswordState, setResetPasswordState] =
+    useSetState<IResetPasswordState>({
+      username: '',
+      password: '',
+      confirmPassword: '',
+      sms: '',
+    });
 
   const smsSecond = useRef(60);
   const smsRef = useRef(0);
@@ -60,25 +64,37 @@ export const ResetPassword: FC<IResetPasswordProps> = (props) => {
     // eslint-disable-next-line
   }, []);
 
-  const onUserNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setResetPasswordState({ username: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onUserNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setResetPasswordState({ username: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
-  const onPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setResetPasswordState({ password: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onPasswordChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setResetPasswordState({ password: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
-  const onConfirmPasswordChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setResetPasswordState({ confirmPassword: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onConfirmPasswordChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setResetPasswordState({ confirmPassword: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
-  const onSmsChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setResetPasswordState({ sms: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onSmsChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setResetPasswordState({ sms: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSendSmsClick = useCallback(async () => {
     try {
@@ -94,7 +110,10 @@ export const ResetPassword: FC<IResetPasswordProps> = (props) => {
         return;
       }
 
-      await sendSms({ phoneNumber: resetPasswordState.username, token: dxTokenRef.current });
+      await sendSms({
+        phoneNumber: resetPasswordState.username,
+        token: dxTokenRef.current,
+      });
 
       message.success('发送验证码成功');
 
@@ -116,7 +135,7 @@ export const ResetPassword: FC<IResetPasswordProps> = (props) => {
       dxInstanceRef.current?.reload();
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: ex instanceof Error ? ex.message : '未知错误',
       });
     } finally {
       setLoadingState({ smsLoading: false });
@@ -155,7 +174,7 @@ export const ResetPassword: FC<IResetPasswordProps> = (props) => {
     } catch (ex) {
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: ex instanceof Error ? ex.message : '未知错误',
       });
     } finally {
       setLoadingState({ loading: false });
@@ -200,13 +219,24 @@ export const ResetPassword: FC<IResetPasswordProps> = (props) => {
         placeholder="请输入验证码"
         value={resetPasswordState.sms}
         onChange={onSmsChange}
-        addonAfter={(
-          <Button type="link" loading={loadingState.smsLoading} disabled={smsDisabled} onClick={onSendSmsClick}>
+        addonAfter={
+          <Button
+            type="link"
+            loading={loadingState.smsLoading}
+            disabled={smsDisabled}
+            onClick={onSendSmsClick}
+          >
             {smsText}
           </Button>
-        )}
+        }
       />
-      <Button type="primary" size="large" loading={loadingState.loading} block onClick={onResetPasswordClick}>
+      <Button
+        type="primary"
+        size="large"
+        loading={loadingState.loading}
+        block
+        onClick={onResetPasswordClick}
+      >
         重置密码
       </Button>
       <Button type="link" size="large" block onClick={switchMode}>

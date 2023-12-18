@@ -18,7 +18,7 @@ export default function App<
   Component,
   pageProps,
 }: {
-  Component: React.FunctionComponent;
+  Component: React.FunctionComponent<T>;
   pageProps: T;
 }) {
   const [userState, userDispatch] = useReducer<

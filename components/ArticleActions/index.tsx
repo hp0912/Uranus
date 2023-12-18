@@ -1,11 +1,37 @@
-import { EyeOutlined, LikeFilled, LikeOutlined, LoadingOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
+import {
+  EyeOutlined,
+  LikeFilled,
+  LikeOutlined,
+  LoadingOutlined,
+  MessageOutlined,
+  StarOutlined,
+} from '@ant-design/icons';
 import { Divider, message, Modal } from 'antd';
-import React, { CSSProperties, FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  CSSProperties,
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import LazyLoad from 'react-lazyload';
 import { UserContext } from '../../store/user';
-import { CommentType, IArticleEntity, ICommentEntity, IUranusNode, LikesType } from '../../types';
+import {
+  CommentType,
+  IArticleEntity,
+  ICommentEntity,
+  IUranusNode,
+  LikesType,
+} from '../../types';
 import { useSetState } from '../../utils/commonHooks';
-import { articleActionDataGet, commentDelete, commentSubmit, likesCancel, likesSubmit } from '../../utils/httpClient';
+import {
+  articleActionDataGet,
+  commentDelete,
+  commentSubmit,
+  likesCancel,
+  likesSubmit,
+} from '../../utils/httpClient';
 import { UranusComment } from '../UranusComment';
 
 // 样式
@@ -29,7 +55,9 @@ interface IActionDataState {
 export const ArticleActions: FC<IArticleActionsProps> = (props) => {
   const userContext = useContext(UserContext);
 
-  const [commentVisible, setCommentVisible] = useState(props.autoExpand ? true : false);
+  const [commentVisible, setCommentVisible] = useState(
+    props.autoExpand ? true : false
+  );
   const [actionData, setActionData] = useSetState<IActionDataState>({
     viewCount: 0,
     commentCount: 0,
@@ -39,31 +67,42 @@ export const ArticleActions: FC<IArticleActionsProps> = (props) => {
   });
 
   useEffect(() => {
-    articleActionDataGet(props.article.id!).then(result => {
-      const { viewCount, commentCount, likesCount, liked } = result.data.data;
-      setActionData({ viewCount, commentCount, likesCount, liked });
-    }).catch(reason => {
-      message.error(reason.message);
-    });
+    articleActionDataGet(props.article.id!)
+      .then((result) => {
+        const { viewCount, commentCount, likesCount, liked } = result.data.data;
+        setActionData({ viewCount, commentCount, likesCount, liked });
+      })
+      .catch((reason) => {
+        message.error(reason.message);
+      });
     // eslint-disable-next-line
   }, [props.article.id, userContext.userState]);
 
-  const onCommentSubmit = useCallback(async (parentId: string, comment: { rows: IUranusNode[][] }): Promise<ICommentEntity> => {
-    const { id } = props.article;
+  const onCommentSubmit = useCallback(
+    async (
+      parentId: string,
+      comment: { rows: IUranusNode[][] }
+    ): Promise<ICommentEntity> => {
+      const { id } = props.article;
 
-    const result = await commentSubmit({
-      commentType: CommentType.article,
-      targetId: id!,
-      parentId,
-      content: comment,
-    });
+      const result = await commentSubmit({
+        commentType: CommentType.article,
+        targetId: id!,
+        parentId,
+        content: comment,
+      });
 
-    return result.data.data;
-  }, [props.article]);
+      return result.data.data;
+    },
+    [props.article]
+  );
 
-  const onCommentDelete = useCallback(async (commentId: string): Promise<void> => {
-    await commentDelete({ commentId });
-  }, []);
+  const onCommentDelete = useCallback(
+    async (commentId: string): Promise<void> => {
+      await commentDelete({ commentId });
+    },
+    []
+  );
 
   const onStartClick = useCallback(() => {
     Modal.warn({
@@ -77,20 +116,32 @@ export const ArticleActions: FC<IArticleActionsProps> = (props) => {
       setActionData({ likesLoading: true });
 
       if (actionData.liked) {
-        await likesCancel({ likesType: LikesType.article, targetId: props.article.id! });
+        await likesCancel({
+          likesType: LikesType.article,
+          targetId: props.article.id!,
+        });
       } else {
-        await likesSubmit({ likesType: LikesType.article, targetId: props.article.id! });
+        await likesSubmit({
+          likesType: LikesType.article,
+          targetId: props.article.id!,
+        });
       }
 
       const result = await articleActionDataGet(props.article.id!);
 
       const { viewCount, commentCount, likesCount, liked } = result.data.data;
-      setActionData({ viewCount, commentCount, likesCount, liked, likesLoading: false });
+      setActionData({
+        viewCount,
+        commentCount,
+        likesCount,
+        liked,
+        likesLoading: false,
+      });
     } catch (ex) {
       setActionData({ likesLoading: false });
       Modal.error({
         title: '错误',
-        content: ex.message,
+        content: ex instanceof Error ? ex.message : '未知错误',
       });
     }
     // eslint-disable-next-line
@@ -104,7 +155,8 @@ export const ArticleActions: FC<IArticleActionsProps> = (props) => {
     <div>
       <div className={styles.actions} style={props.actionItemsStyle}>
         <span className={styles.actions_item}>
-          <EyeOutlined /> {actionData.viewCount > 0 ? actionData.viewCount : null}
+          <EyeOutlined />{' '}
+          {actionData.viewCount > 0 ? actionData.viewCount : null}
         </span>
         <Divider type="vertical" />
         <span className={styles.actions_item} onClick={onStartClick}>
@@ -112,34 +164,32 @@ export const ArticleActions: FC<IArticleActionsProps> = (props) => {
         </span>
         <Divider type="vertical" />
         <span className={styles.actions_item} onClick={onLikeClick}>
-          {
-            actionData.likesLoading ?
-              <LoadingOutlined /> :
-              actionData.liked ?
-                <LikeFilled /> :
-                <LikeOutlined />
-          }
+          {actionData.likesLoading ? (
+            <LoadingOutlined />
+          ) : actionData.liked ? (
+            <LikeFilled />
+          ) : (
+            <LikeOutlined />
+          )}
           {actionData.likesCount > 0 ? actionData.likesCount : null}
         </span>
         <Divider type="vertical" />
         <span className={styles.actions_item} onClick={onCommentClick}>
-          <MessageOutlined /> {actionData.commentCount > 0 ? actionData.commentCount : null}
+          <MessageOutlined />{' '}
+          {actionData.commentCount > 0 ? actionData.commentCount : null}
         </span>
       </div>
-      {
-        commentVisible &&
-        (
-          <UranusComment
-            className={commentStyles.comment}
-            commentType={CommentType.article}
-            targetId={props.article.id!}
-            parentId="0"
-            onSubmit={onCommentSubmit}
-            onDelete={onCommentDelete}
-            user={userContext.userState}
-          />
-        )
-      }
+      {commentVisible && (
+        <UranusComment
+          className={commentStyles.comment}
+          commentType={CommentType.article}
+          targetId={props.article.id!}
+          parentId="0"
+          onSubmit={onCommentSubmit}
+          onDelete={onCommentDelete}
+          user={userContext.userState}
+        />
+      )}
     </div>
   );
 };

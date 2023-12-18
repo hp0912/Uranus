@@ -1,4 +1,10 @@
-import { DeleteOutlined, EditOutlined, LoadingOutlined, PauseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  LoadingOutlined,
+  PauseCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
 import { Input, message, Modal, Popconfirm, Table, Tooltip } from 'antd';
 import { ColumnsType, TablePaginationConfig } from 'antd/lib/table/interface';
 import React, { FC, useCallback, useEffect } from 'react';
@@ -73,7 +79,11 @@ export const MyBlog: FC = () => {
       width: '15%',
       align: 'center',
       render: (auditStatus: AuditStatus) => {
-        return <span>{auditStatus === AuditStatus.approved ? '通过' : '未通过'}</span>;
+        return (
+          <span>
+            {auditStatus === AuditStatus.approved ? '通过' : '未通过'}
+          </span>
+        );
       },
     },
     {
@@ -87,97 +97,122 @@ export const MyBlog: FC = () => {
             <Link href={`/article/edit/${item.id}`}>
               <EditOutlined className="uranus-margin-right-8" />
             </Link>
-            {
-              myBlogState.deleting && myBlogState.currentOPId === item.id ?
-                <LoadingOutlined /> :
-                myBlogState.deleting ?
-                  <PauseCircleOutlined /> :
-                  (
-                    <Popconfirm
-                      title="确定要删除该博客吗？"
-                      okText="确认"
-                      cancelText="取消"
-                      icon={<QuestionCircleOutlined className={styles.uranus_delete_icon} />}
-                      onConfirm={() => { onMyBlogDelete(item.id!); }}
-                    >
-                      <Tooltip title="删除">
-                        <DeleteOutlined />
-                      </Tooltip>
-                    </Popconfirm>
-                  )
-            }
+            {myBlogState.deleting && myBlogState.currentOPId === item.id ? (
+              <LoadingOutlined />
+            ) : myBlogState.deleting ? (
+              <PauseCircleOutlined />
+            ) : (
+              <Popconfirm
+                title="确定要删除该博客吗？"
+                okText="确认"
+                cancelText="取消"
+                icon={
+                  <QuestionCircleOutlined
+                    className={styles.uranus_delete_icon}
+                  />
+                }
+                onConfirm={() => {
+                  onMyBlogDelete(item.id!);
+                }}
+              >
+                <Tooltip title="删除">
+                  <DeleteOutlined />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </>
         );
       },
     },
   ];
 
-  const onMyBlogDelete = useCallback(async (articleId: string) => {
-    try {
-      setMyBlogState({ deleting: true, currentOPId: articleId });
-      const { pagination: { current, pageSize }, searchValue } = myBlogState;
+  const onMyBlogDelete = useCallback(
+    async (articleId: string) => {
+      try {
+        setMyBlogState({ deleting: true, currentOPId: articleId });
+        const {
+          pagination: { current, pageSize },
+          searchValue,
+        } = myBlogState;
 
-      await articleDelete({ id: articleId });
-      const articlesResult = await myArticles({ pagination: { current, pageSize }, searchValue });
-      const { articles, total } = articlesResult.data.data;
+        await articleDelete({ id: articleId });
+        const articlesResult = await myArticles({
+          pagination: { current, pageSize },
+          searchValue,
+        });
+        const { articles, total } = articlesResult.data.data;
 
-      setMyBlogState({
-        deleting: false,
-        currentOPId: null,
-        data: articles,
-        pagination: {
-          ...myBlogState.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      Modal.error({
-        title: '错误',
-        content: ex.message,
-      });
-      setMyBlogState({ deleting: false, currentOPId: null });
-    }
-    // eslint-disable-next-line
-  }, [myBlogState]);
-
-  const geMyBlogs = useCallback(async (params?: IMyBlogParams) => {
-    try {
-      if (!params) {
-        params = { pagination: { current: 1, pageSize: 15 }, searchValue: myBlogState.searchValue };
+        setMyBlogState({
+          deleting: false,
+          currentOPId: null,
+          data: articles,
+          pagination: {
+            ...myBlogState.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        Modal.error({
+          title: '错误',
+          content: ex instanceof Error ? ex.message : '未知错误',
+        });
+        setMyBlogState({ deleting: false, currentOPId: null });
       }
+      // eslint-disable-next-line
+    },
+    [myBlogState]
+  );
 
-      setMyBlogState({ loading: true });
+  const geMyBlogs = useCallback(
+    async (params?: IMyBlogParams) => {
+      try {
+        if (!params) {
+          params = {
+            pagination: { current: 1, pageSize: 15 },
+            searchValue: myBlogState.searchValue,
+          };
+        }
 
-      const articlesResult = await myArticles(params);
-      const { articles, total } = articlesResult.data.data;
+        setMyBlogState({ loading: true });
 
-      setMyBlogState({
-        loading: false,
-        data: articles,
-        pagination: {
-          ...myBlogState.pagination,
-          ...params.pagination,
-          total,
-        },
-      });
-    } catch (ex) {
-      message.error(ex.message);
-      setMyBlogState({ loading: false });
-    }
-    // eslint-disable-next-line
-  }, [myBlogState]);
+        const articlesResult = await myArticles(params);
+        const { articles, total } = articlesResult.data.data;
 
-  const onTableChange = useCallback((
-    pagination: TablePaginationConfig,
-  ) => {
-    const params = { pagination, searchValue: myBlogState.searchValue };
-    geMyBlogs(params);
-  }, [myBlogState.searchValue, geMyBlogs]);
+        setMyBlogState({
+          loading: false,
+          data: articles,
+          pagination: {
+            ...myBlogState.pagination,
+            ...params.pagination,
+            total,
+          },
+        });
+      } catch (ex) {
+        if (ex instanceof Error) {
+          message.error(ex.message);
+        }
+        setMyBlogState({ loading: false });
+      }
+      // eslint-disable-next-line
+    },
+    [myBlogState]
+  );
 
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setMyBlogState({ searchValue: event.target.value });
-    // eslint-disable-next-line
-  }, []);
+  const onTableChange = useCallback(
+    (pagination: TablePaginationConfig) => {
+      const params = { pagination, searchValue: myBlogState.searchValue };
+      geMyBlogs(params);
+    },
+    [myBlogState.searchValue, geMyBlogs]
+  );
+
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setMyBlogState({ searchValue: event.target.value });
+      // eslint-disable-next-line
+    },
+    []
+  );
 
   const onSearch = useCallback(() => {
     if (myBlogState.loading) {

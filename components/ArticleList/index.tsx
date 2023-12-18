@@ -123,7 +123,7 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
     _md.use(emoji).use(mark).use(ins).use(abbr).use(sup).use(sub);
 
     _md.renderer.rules.emoji = (token, idx) => {
-      return twemoji.parse(token[idx].content);
+      return twemoji.parse(token[idx].content) as unknown as string;
     };
 
     return _md;
@@ -216,10 +216,7 @@ export const ArticleList: FC<IArticleListProps> = (props) => {
           itemRender: (
             page: number,
             type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next',
-            originalElement: React.ReactElement<
-              HTMLElement,
-              string | React.JSXElementConstructor<any>
-            >
+            originalElement: React.ReactNode
           ) => {
             const { pageSize, searchValue } = parseQuery(router.query);
             return (

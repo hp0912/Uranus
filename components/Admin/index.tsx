@@ -29,7 +29,7 @@ export enum AdminMenuKey {
   website_management = 'website_management',
 }
 
-const AdminContainer: FC = (props) => {
+const AdminContainer: FC<{ children: React.ReactNode }> = (props) => {
   const router = useRouter();
   const userContext = useContext(UserContext);
 
@@ -43,11 +43,16 @@ const AdminContainer: FC = (props) => {
     router.push('/');
   }, [router]);
 
-  const onMenuClick = useCallback((param: MenuInfo) => {
-    router.push(`/admin/${param.key}`);
-  }, [router]);
+  const onMenuClick = useCallback(
+    (param: MenuInfo) => {
+      router.push(`/admin/${param.key}`);
+    },
+    [router]
+  );
 
-  const selectedKeysMatch = router.pathname.match(/^\/admin\/([^/]+?)(?:\/|\?|$)/);
+  const selectedKeysMatch = router.pathname.match(
+    /^\/admin\/([^/]+?)(?:\/|\?|$)/
+  );
   const selectedKeys: string[] = [];
 
   if (selectedKeysMatch && selectedKeysMatch[1]) {
@@ -67,35 +72,63 @@ const AdminContainer: FC = (props) => {
         className="uranus-403"
         title="403"
         subTitle="亲, 您没有权限访问此页面呢..."
-        extra={<Button type="primary" href="/">返回首页</Button>}
+        extra={
+          <Button type="primary" href="/">
+            返回首页
+          </Button>
+        }
       />
     );
   }
 
   return (
     <Layout className={styles.layout}>
-      <Sider collapsible collapsed={siderCollapsed} onCollapse={onSiderCollapse}>
+      <Sider
+        collapsible
+        collapsed={siderCollapsed}
+        onCollapse={onSiderCollapse}
+      >
         <div className={styles.logo} onClick={goHome} />
-        <Menu theme="dark" defaultSelectedKeys={selectedKeys} mode="inline" onClick={onMenuClick}>
-          <Menu.Item key={AdminMenuKey.article_management} icon={<FileProtectOutlined />}>
+        <Menu
+          theme="dark"
+          defaultSelectedKeys={selectedKeys}
+          mode="inline"
+          onClick={onMenuClick}
+        >
+          <Menu.Item
+            key={AdminMenuKey.article_management}
+            icon={<FileProtectOutlined />}
+          >
             文章管理
           </Menu.Item>
           <Menu.Item key={AdminMenuKey.tag_management} icon={<TagOutlined />}>
             标签管理
           </Menu.Item>
-          <Menu.Item key={AdminMenuKey.comment_management} icon={<CommentOutlined />}>
+          <Menu.Item
+            key={AdminMenuKey.comment_management}
+            icon={<CommentOutlined />}
+          >
             评论管理
           </Menu.Item>
-          <Menu.Item key={AdminMenuKey.message_management} icon={<MessageOutlined />}>
+          <Menu.Item
+            key={AdminMenuKey.message_management}
+            icon={<MessageOutlined />}
+          >
             留言管理
           </Menu.Item>
-          <Menu.Item key={AdminMenuKey.order_management} icon={<TaobaoCircleOutlined />}>
+          <Menu.Item
+            key={AdminMenuKey.order_management}
+            icon={<TaobaoCircleOutlined />}
+          >
             订单管理
           </Menu.Item>
           <Menu.Item key={AdminMenuKey.user_management} icon={<UserOutlined />}>
             用户管理
           </Menu.Item>
-          <Menu.Item key={AdminMenuKey.website_management} icon={<GlobalOutlined />}>
+          <Menu.Item
+            key={AdminMenuKey.website_management}
+            icon={<GlobalOutlined />}
+          >
             网站管理
           </Menu.Item>
         </Menu>
@@ -104,9 +137,7 @@ const AdminContainer: FC = (props) => {
         <Header className={styles.header}>
           <UserAvatar isBackend={true} avatarColor="#000" avatarSize={38} />
         </Header>
-        <Content className={styles.content}>
-          {props.children}
-        </Content>
+        <Content className={styles.content}>{props.children}</Content>
       </Layout>
     </Layout>
   );
